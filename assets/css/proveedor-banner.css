@@ -1,0 +1,342 @@
+/**
+ * Estilos para Banner de Proveedor
+ * Fullday Users Plugin
+ */
+
+/* Account Status Badge */
+.account-status-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.status-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1F2937;
+}
+
+.status-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    background: #6DA5F5;
+    color: white;
+}
+
+/* Banner Preview en Dashboard */
+.banner-preview-section {
+    margin-bottom: 48px;
+}
+
+.section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1F2937;
+    margin: 0 0 8px 0;
+}
+
+.section-description {
+    font-size: 14px;
+    color: #6B7280;
+    margin: 0 0 24px 0;
+}
+
+.section-subtitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1F2937;
+    margin: 32px 0 16px 0;
+}
+
+.proveedor-banner-preview {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 16px;
+}
+
+.banner-image {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background-size: cover;
+    background-position: center;
+    background-color: #F3F4F6;
+    cursor: pointer;
+}
+
+.banner-upload-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.banner-image:hover .banner-upload-overlay {
+    opacity: 1;
+}
+
+.banner-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #9CA3AF;
+}
+
+.banner-placeholder svg {
+    margin-bottom: 12px;
+}
+
+.banner-placeholder p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.banner-content-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    padding: 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+}
+
+.banner-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #F3F4F6;
+    overflow: hidden;
+    border: 4px solid white;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.banner-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner-avatar-initials {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6B7280;
+}
+
+.banner-info {
+    flex: 1;
+}
+
+.banner-empresa {
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 8px 0;
+}
+
+.banner-social {
+    display: flex;
+    gap: 12px;
+}
+
+.social-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+}
+
+.social-icon:hover {
+    background: #1d8fc7;
+    transform: translateY(-2px);
+}
+
+.btn-cambiar-banner {
+    padding: 12px 24px;
+    background: #6DA5F5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-cambiar-banner:hover {
+    background: #5A8FDB;
+    transform: translateY(-2px);
+}
+
+.banner-upload-hint {
+    margin: 0;
+    font-size: 13px;
+    color: white;
+}
+
+/* Banner Público */
+.fullday-proveedor-banner-public {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 32px;
+}
+
+.banner-image-public {
+    width: 100%;
+    height: 350px;
+    background-size: cover;
+    background-position: center;
+    background-color: #F3F4F6;
+}
+
+.banner-placeholder-public {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.banner-content-public {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    padding: 32px;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+.banner-avatar-public {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #F3F4F6;
+    overflow: hidden;
+    border: 5px solid white;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.banner-avatar-public img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner-avatar-initials-public {
+    font-size: 32px;
+    font-weight: 700;
+    color: #6B7280;
+}
+
+.banner-info-public {
+    flex: 1;
+}
+
+.banner-empresa-public {
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 12px 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.banner-social-public {
+    display: flex;
+    gap: 12px;
+}
+
+.social-icon-public {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.social-icon-public:hover {
+    background: #1d8fc7;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .banner-image {
+        height: 200px;
+    }
+
+    .banner-content-overlay {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .banner-avatar {
+        width: 60px;
+        height: 60px;
+    }
+
+    .banner-empresa {
+        font-size: 20px;
+    }
+
+    .banner-image-public {
+        height: 250px;
+    }
+
+    .banner-content-public {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .banner-avatar-public {
+        width: 80px;
+        height: 80px;
+    }
+
+    .banner-empresa-public {
+        font-size: 24px;
+    }
+}

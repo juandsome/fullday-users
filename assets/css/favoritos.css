@@ -1,0 +1,394 @@
+/**
+ * Estilos para Favoritos
+ * Fullday Users Plugin
+ */
+
+/* Container */
+.favoritos-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+/* Header */
+.favoritos-header {
+    margin-bottom: 32px;
+}
+
+.favoritos-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 8px 0;
+}
+
+.favoritos-title svg {
+    color: #EF4444;
+}
+
+.favoritos-description {
+    color: #6B7280;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Grid de Favoritos */
+.favoritos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+/* Card de Favorito */
+.favorito-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.favorito-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Imagen del Card */
+.card-image {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: #F3F4F6;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.favorito-card:hover .card-image img {
+    transform: scale(1.05);
+}
+
+.card-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9CA3AF;
+}
+
+/* Botón de Favorito - Shortcode y Template */
+.fullday-favorite-btn {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    width: 40px !important;
+    height: 40px !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    z-index: 10 !important;
+}
+
+.fullday-favorite-btn:hover {
+    transform: scale(1.1) !important;
+}
+
+/* Corazón blanco relleno por defecto */
+.fullday-favorite-btn svg {
+    color: white !important;
+    transition: all 0.2s ease !important;
+    width: 28px !important;
+    height: 28px !important;
+}
+
+.fullday-favorite-btn .heart-filled {
+    display: block !important;
+}
+
+.fullday-favorite-btn .heart-outline {
+    display: none !important;
+}
+
+/* Cuando está en favoritos - rojo relleno */
+.fullday-favorite-btn.is-favorite svg {
+    color: #EF4444 !important;
+}
+
+.fullday-favorite-btn.is-favorite .heart-filled {
+    display: block !important;
+}
+
+.fullday-favorite-btn.is-favorite .heart-outline {
+    display: none !important;
+}
+
+.fullday-favorite-btn:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+}
+
+/* Toast Message para favoritos */
+.fullday-toast-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: none;
+}
+
+.fullday-toast-message.success {
+    background: #D1FAE5;
+    color: #065F46;
+    border: 1px solid #10B981;
+}
+
+.fullday-toast-message.error {
+    background: #FEE2E2;
+    color: #991B1B;
+    border: 1px solid #EF4444;
+}
+
+/* Badge de Descuento */
+.card-discount-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #EF4444;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 5;
+}
+
+/* Contenido del Card */
+.card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-location {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #6B7280;
+    font-size: 14px;
+}
+
+.card-location svg {
+    flex-shrink: 0;
+}
+
+/* Meta del Card */
+.card-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.card-rating,
+.card-departure,
+.card-duration {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: #374151;
+}
+
+.card-rating svg {
+    flex-shrink: 0;
+}
+
+.card-departure svg {
+    flex-shrink: 0;
+    color: #6B7280;
+}
+
+.card-duration svg {
+    flex-shrink: 0;
+    color: #6B7280;
+}
+
+/* Footer del Card */
+.card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid #E5E7EB;
+    margin-top: auto;
+}
+
+.card-price-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.card-price-original {
+    font-size: 13px;
+    color: #9CA3AF;
+    text-decoration: line-through;
+}
+
+.card-price {
+    font-size: 20px;
+    font-weight: 700;
+    color: #10B981;
+}
+
+.btn-ver-detalle {
+    padding: 8px 16px;
+    background: #6DA5F5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.btn-ver-detalle:hover {
+    background: #5B92DC;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(109, 165, 245, 0.3);
+    text-decoration: none !important;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.empty-state svg {
+    color: #D1D5DB;
+    margin-bottom: 24px;
+}
+
+.empty-state h3 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 12px 0;
+}
+
+.empty-state p {
+    color: #6B7280;
+    font-size: 16px;
+    margin: 0 0 24px 0;
+}
+
+.empty-state .btn-primary {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #6DA5F5;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.empty-state .btn-primary:hover {
+    background: #5B92DC;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(109, 165, 245, 0.3);
+}
+
+/* Mensajes */
+#favoritos-message {
+    margin-top: 20px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+#favoritos-message.success {
+    background: #D1FAE5;
+    color: #065F46;
+    border: 1px solid #10B981;
+}
+
+#favoritos-message.error {
+    background: #FEE2E2;
+    color: #991B1B;
+    border: 1px solid #EF4444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .favoritos-container {
+        padding: 24px 16px;
+    }
+
+    .favoritos-title {
+        font-size: 24px;
+    }
+
+    .favoritos-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .card-footer {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .btn-ver-detalle {
+        width: 100%;
+        text-align: center;
+    }
+}

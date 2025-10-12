@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Windows/Local Sites/fullday/app/public/wp-content/plugins/full-days/**)",
+      "Read(//c/Users/Windows/Local Sites/fullday/app/public/wp-content/plugins/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

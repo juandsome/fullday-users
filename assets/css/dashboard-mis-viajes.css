@@ -1,0 +1,476 @@
+/**
+ * Estilos para Dashboard Mis Viajes
+ * Fullday Users Plugin
+ */
+
+/* Container */
+.mis-viajes-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header */
+.mis-viajes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    gap: 20px;
+}
+
+.header-content {
+    flex: 1;
+}
+
+.mis-viajes-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1F2937;
+    margin: 0 0 8px 0;
+}
+
+.mis-viajes-title svg {
+    color: #6DA5F5;
+}
+
+.mis-viajes-description {
+    font-size: 15px;
+    color: #6B7280;
+    margin: 0;
+}
+
+.btn-nuevo-fullday {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #6DA5F5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-nuevo-fullday:hover {
+    background: #5B8FDB;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(109, 165, 245, 0.3);
+}
+
+/* Grid */
+.fulldays-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+/* Card */
+.fullday-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.fullday-card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+/* Card Image */
+.card-image {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: #F3F4F6;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.fullday-card:hover .card-image img {
+    transform: scale(1.05);
+}
+
+.card-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+}
+
+.card-image-placeholder svg {
+    color: #9CA3AF;
+}
+
+/* Card Content */
+.card-content {
+    padding: 20px;
+}
+
+/* Card Header */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1F2937;
+    margin: 0 0 6px 0;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.card-price {
+    font-size: 20px;
+    font-weight: 700;
+    color: #6DA5F5;
+    margin: 0;
+}
+
+/* Status Badge */
+.card-status-badge {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.card-status-badge.active {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.card-status-badge.active:hover {
+    background: #BFDBFE;
+}
+
+.card-status-badge.paused {
+    background: #F3F4F6;
+    color: #6B7280;
+}
+
+.card-status-badge.paused:hover {
+    background: #E5E7EB;
+}
+
+/* Availability Control */
+.card-availability {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 0 !important;
+    border-top: 1px solid #F3F4F6 !important;
+}
+
+.availability-label {
+    font-size: 13px !important;
+    color: #6B7280 !important;
+    font-weight: 500 !important;
+}
+
+.availability-control {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.btn-availability {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    border-radius: 6px !important;
+    border: 1px solid #D1D5DB !important;
+    background: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.btn-availability:hover {
+    background: #F3F4F6 !important;
+    border-color: #6DA5F5 !important;
+}
+
+.btn-availability:hover svg {
+    color: #6DA5F5 !important;
+}
+
+.btn-availability svg {
+    color: #6B7280 !important;
+    transition: all 0.2s !important;
+    width: 12px !important;
+    height: 12px !important;
+}
+
+.btn-availability:disabled {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+}
+
+.btn-availability:disabled:hover {
+    background: white !important;
+    border-color: #D1D5DB !important;
+}
+
+.availability-input {
+    width: 50px !important;
+    height: 32px !important;
+    text-align: center !important;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #1F2937 !important;
+    background: #F9FAFB !important;
+    -moz-appearance: textfield !important;
+    padding: 4px !important;
+    margin: 0 !important;
+    transition: all 0.2s !important;
+}
+
+.availability-input.loading {
+    background: #E5E7EB !important;
+    color: #9CA3AF !important;
+    pointer-events: none !important;
+}
+
+.availability-input::-webkit-outer-spin-button,
+.availability-input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+.availability-max {
+    font-size: 13px !important;
+    color: #9CA3AF !important;
+}
+
+/* Stats */
+.card-stats {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #F3F4F6;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #6B7280;
+}
+
+.stat-item svg {
+    color: #9CA3AF;
+    flex-shrink: 0;
+}
+
+/* Actions */
+.card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-action {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 12px;
+    border: 1px solid #E5E7EB;
+    background: white;
+    color: #6B7280;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-action:hover {
+    background: #F9FAFB;
+    border-color: #D1D5DB;
+    color: #374151;
+}
+
+.btn-action svg {
+    flex-shrink: 0;
+}
+
+.btn-editar:hover {
+    background: #EFF6FF;
+    border-color: #6DA5F5;
+    color: #1E40AF;
+}
+
+.btn-ver:hover {
+    background: #F0FDF4;
+    border-color: #10B981;
+    color: #065F46;
+}
+
+/* Botón Ver deshabilitado */
+.btn-ver.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    background: #F3F4F6;
+    color: #9CA3AF;
+    border-color: #E5E7EB;
+}
+
+.btn-ver.disabled:hover {
+    background: #F3F4F6;
+    border-color: #E5E7EB;
+    color: #9CA3AF;
+}
+
+.btn-eliminar:hover {
+    background: #FEF2F2;
+    border-color: #EF4444;
+    color: #991B1B;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.empty-state svg {
+    color: #D1D5DB;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1F2937;
+    margin: 0 0 8px 0;
+}
+
+.empty-state p {
+    font-size: 15px;
+    color: #6B7280;
+    margin: 0 0 24px 0;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #6DA5F5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background: #5B8FDB;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(109, 165, 245, 0.3);
+}
+
+/* Messages */
+.form-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-message.success {
+    background: #D1FAE5;
+    color: #065F46;
+    border: 1px solid #10B981;
+}
+
+.form-message.error {
+    background: #FEE2E2;
+    color: #991B1B;
+    border: 1px solid #EF4444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .mis-viajes-header {
+        flex-direction: column;
+    }
+
+    .btn-nuevo-fullday {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .fulldays-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-stats {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .card-status-badge {
+        align-self: flex-start;
+    }
+}
