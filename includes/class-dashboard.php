@@ -778,32 +778,83 @@ class Fullday_Users_Dashboard {
         // Formato guardado: array('123' => 1, '456' => 2, '789' => 3)
         // Donde la clave es el term_id y el valor es el orden (1, 2, 3)
         if (!empty($_POST['region_order'])) {
+            error_log('=== INICIO ASIGNACIÓN DE REGIONES ===');
+            error_log('POST region_order recibido: ' . $_POST['region_order']);
+
             $region_order_json = sanitize_text_field($_POST['region_order']);
+            error_log('region_order_json después de sanitize: ' . $region_order_json);
+
+            // Remover las barras invertidas que WordPress agrega automáticamente
+            $region_order_json = stripslashes($region_order_json);
+            error_log('region_order_json después de stripslashes: ' . $region_order_json);
+
             $region_order = json_decode($region_order_json, true);
+            error_log('region_order después de json_decode: ' . print_r($region_order, true));
+            error_log('Es array? ' . (is_array($region_order) ? 'SI' : 'NO'));
+            error_log('Está vacío? ' . (empty($region_order) ? 'SI' : 'NO'));
 
             if (is_array($region_order) && !empty($region_order)) {
                 // Guardar el array de orden como meta
-                update_post_meta($post_id, 'region_order', $region_order);
+                $meta_result = update_post_meta($post_id, 'region_order', $region_order);
+                error_log('Resultado de update_post_meta: ' . ($meta_result ? 'SUCCESS' : 'FAILED'));
 
                 // También asignar las regiones (ciudades) y sus padres (estados) a la taxonomía
                 $region_ids = array_map('intval', array_keys($region_order));
+                error_log('region_ids (ciudades seleccionadas): ' . print_r($region_ids, true));
+
                 $all_region_ids = array();
 
                 foreach ($region_ids as $region_id) {
+                    error_log('Procesando region_id: ' . $region_id);
+
                     // Agregar la ciudad
                     $all_region_ids[] = $region_id;
+                    error_log('Ciudad agregada: ' . $region_id);
 
                     // Obtener y agregar el estado padre si existe
                     $term = get_term($region_id, 'region');
-                    if ($term && !is_wp_error($term) && $term->parent > 0) {
-                        $all_region_ids[] = $term->parent;
+                    error_log('get_term resultado para ' . $region_id . ': ' . print_r($term, true));
+
+                    if ($term && !is_wp_error($term)) {
+                        error_log('Term válido. Parent ID: ' . $term->parent);
+                        if ($term->parent > 0) {
+                            $all_region_ids[] = $term->parent;
+                            error_log('Estado padre agregado: ' . $term->parent);
+                        } else {
+                            error_log('Este término NO tiene padre (parent = 0)');
+                        }
+                    } else {
+                        if (is_wp_error($term)) {
+                            error_log('ERROR en get_term: ' . $term->get_error_message());
+                        } else {
+                            error_log('Term no válido o vacío');
+                        }
                     }
                 }
 
                 // Eliminar duplicados y asignar todas las regiones (ciudades + estados)
                 $all_region_ids = array_unique($all_region_ids);
-                wp_set_object_terms($post_id, $all_region_ids, 'region');
+                error_log('all_region_ids final (después de unique): ' . print_r($all_region_ids, true));
+                error_log('Post ID para asignación: ' . $post_id);
+                error_log('Taxonomía: region');
+
+                $result = wp_set_object_terms($post_id, $all_region_ids, 'region');
+                error_log('Resultado de wp_set_object_terms: ' . print_r($result, true));
+
+                if (is_wp_error($result)) {
+                    error_log('ERROR en wp_set_object_terms: ' . $result->get_error_message());
+                } else {
+                    error_log('wp_set_object_terms ejecutado correctamente');
+                    // Verificar que se asignaron
+                    $assigned_terms = wp_get_object_terms($post_id, 'region');
+                    error_log('Términos asignados después de wp_set_object_terms: ' . print_r($assigned_terms, true));
+                }
+            } else {
+                error_log('region_order NO es array o está vacío - no se procesó');
             }
+            error_log('=== FIN ASIGNACIÓN DE REGIONES ===');
+        } else {
+            error_log('=== NO SE RECIBIÓ region_order en POST ===');
         }
 
         /**
@@ -1241,35 +1292,84 @@ class Fullday_Users_Dashboard {
         // Actualizar regiones con orden
         // Formato guardado: array('123' => 1, '456' => 2, '789' => 3)
         if (!empty($_POST['region_order'])) {
+            error_log('=== INICIO ACTUALIZACIÓN DE REGIONES ===');
+            error_log('POST region_order recibido: ' . $_POST['region_order']);
+
             $region_order_json = sanitize_text_field($_POST['region_order']);
+            error_log('region_order_json después de sanitize: ' . $region_order_json);
+
+            // Remover las barras invertidas que WordPress agrega automáticamente
+            $region_order_json = stripslashes($region_order_json);
+            error_log('region_order_json después de stripslashes: ' . $region_order_json);
+
             $region_order = json_decode($region_order_json, true);
+            error_log('region_order después de json_decode: ' . print_r($region_order, true));
+            error_log('Es array? ' . (is_array($region_order) ? 'SI' : 'NO'));
+            error_log('Está vacío? ' . (empty($region_order) ? 'SI' : 'NO'));
 
             if (is_array($region_order) && !empty($region_order)) {
                 // Guardar el array de orden como meta
-                update_post_meta($post_id, 'region_order', $region_order);
+                $meta_result = update_post_meta($post_id, 'region_order', $region_order);
+                error_log('Resultado de update_post_meta: ' . ($meta_result ? 'SUCCESS' : 'FAILED'));
 
                 // También asignar las regiones (ciudades) y sus padres (estados) a la taxonomía
                 $region_ids = array_map('intval', array_keys($region_order));
+                error_log('region_ids (ciudades seleccionadas): ' . print_r($region_ids, true));
+
                 $all_region_ids = array();
 
                 foreach ($region_ids as $region_id) {
+                    error_log('Procesando region_id: ' . $region_id);
+
                     // Agregar la ciudad
                     $all_region_ids[] = $region_id;
+                    error_log('Ciudad agregada: ' . $region_id);
 
                     // Obtener y agregar el estado padre si existe
                     $term = get_term($region_id, 'region');
-                    if ($term && !is_wp_error($term) && $term->parent > 0) {
-                        $all_region_ids[] = $term->parent;
+                    error_log('get_term resultado para ' . $region_id . ': ' . print_r($term, true));
+
+                    if ($term && !is_wp_error($term)) {
+                        error_log('Term válido. Parent ID: ' . $term->parent);
+                        if ($term->parent > 0) {
+                            $all_region_ids[] = $term->parent;
+                            error_log('Estado padre agregado: ' . $term->parent);
+                        } else {
+                            error_log('Este término NO tiene padre (parent = 0)');
+                        }
+                    } else {
+                        if (is_wp_error($term)) {
+                            error_log('ERROR en get_term: ' . $term->get_error_message());
+                        } else {
+                            error_log('Term no válido o vacío');
+                        }
                     }
                 }
 
                 // Eliminar duplicados y asignar todas las regiones (ciudades + estados)
                 $all_region_ids = array_unique($all_region_ids);
-                wp_set_object_terms($post_id, $all_region_ids, 'region');
+                error_log('all_region_ids final (después de unique): ' . print_r($all_region_ids, true));
+                error_log('Post ID para asignación: ' . $post_id);
+                error_log('Taxonomía: region');
+
+                $result = wp_set_object_terms($post_id, $all_region_ids, 'region');
+                error_log('Resultado de wp_set_object_terms: ' . print_r($result, true));
+
+                if (is_wp_error($result)) {
+                    error_log('ERROR en wp_set_object_terms: ' . $result->get_error_message());
+                } else {
+                    error_log('wp_set_object_terms ejecutado correctamente');
+                    // Verificar que se asignaron
+                    $assigned_terms = wp_get_object_terms($post_id, 'region');
+                    error_log('Términos asignados después de wp_set_object_terms: ' . print_r($assigned_terms, true));
+                }
+            } else {
+                error_log('region_order NO es array o está vacío - no se procesó');
             }
+            error_log('=== FIN ACTUALIZACIÓN DE REGIONES ===');
         } else {
             // Si no hay regiones, limpiar
-            error_log('No hay regiones seleccionadas, limpiando...');
+            error_log('=== NO SE RECIBIÓ region_order en POST - Limpiando regiones ===');
             delete_post_meta($post_id, 'region_order');
             wp_set_object_terms($post_id, array(), 'region');
         }

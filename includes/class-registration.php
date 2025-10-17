@@ -108,7 +108,7 @@ class Fullday_Users_Registration {
 
                     <!-- Campo de documento para proveedor (oculto por defecto) -->
                     <div class="fullday-form-group" id="documento-group" style="display: none;">
-                        <label for="documento">Documento de Identidad (CI/RIF) *</label>
+                        <label for="documento">Documento de Identidad (CI/RIF) (opcional)</label>
                         <div class="fullday-documento-upload">
                             <div class="documento-dropzone" id="documento-dropzone">
                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

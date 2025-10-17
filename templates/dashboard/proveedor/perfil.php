@@ -173,8 +173,16 @@ $is_approved = ($approved === '1' || $approved === 1);
                 <label for="estado">Estado</label>
                 <select id="estado" name="estado" required>
                     <option value="">Selecciona un estado</option>
-                    <?php foreach (Fullday_Users_Locations::get_estados() as $key => $nombre): ?>
-                        <option value="<?php echo esc_attr($key); ?>" <?php selected($estado, $key); ?>><?php echo esc_html($nombre); ?></option>
+                    <?php
+                    // Obtener estados (términos padre) de la taxonomía region
+                    $estados_terms = get_terms(array(
+                        'taxonomy' => 'region',
+                        'hide_empty' => false,
+                        'parent' => 0
+                    ));
+                    foreach ($estados_terms as $estado_term):
+                    ?>
+                        <option value="<?php echo esc_attr($estado_term->term_id); ?>" <?php selected($estado, $estado_term->term_id); ?>><?php echo esc_html($estado_term->name); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -183,9 +191,17 @@ $is_approved = ($approved === '1' || $approved === 1);
                 <label for="ciudad">Ciudad</label>
                 <select id="ciudad" name="ciudad" required>
                     <option value="">Selecciona una ciudad</option>
-                    <?php if ($estado && $ciudad): ?>
-                        <?php foreach (Fullday_Users_Locations::get_ciudades($estado) as $ciudad_option): ?>
-                            <option value="<?php echo esc_attr($ciudad_option); ?>" <?php selected($ciudad, $ciudad_option); ?>><?php echo esc_html($ciudad_option); ?></option>
+                    <?php if ($estado): ?>
+                        <?php
+                        // Obtener ciudades (términos hijos) del estado seleccionado
+                        $ciudades_terms = get_terms(array(
+                            'taxonomy' => 'region',
+                            'hide_empty' => false,
+                            'parent' => $estado
+                        ));
+                        foreach ($ciudades_terms as $ciudad_term):
+                        ?>
+                            <option value="<?php echo esc_attr($ciudad_term->term_id); ?>" <?php selected($ciudad, $ciudad_term->term_id); ?>><?php echo esc_html($ciudad_term->name); ?></option>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </select>

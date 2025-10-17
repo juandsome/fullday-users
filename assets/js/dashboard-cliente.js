@@ -34,7 +34,8 @@
                         let options = '<option value="">Selecciona una ciudad</option>';
 
                         ciudades.forEach(function(ciudad) {
-                            options += '<option value="' + ciudad + '">' + ciudad + '</option>';
+                            // Ahora las ciudades vienen con id y name desde la taxonomía
+                            options += '<option value="' + ciudad.id + '">' + ciudad.name + '</option>';
                         });
 
                         ciudadSelect.html(options).prop('disabled', false);

@@ -95,16 +95,34 @@ class Fullday_Users_Locations {
     }
 
     /**
-     * AJAX para obtener ciudades
+     * AJAX para obtener ciudades desde la taxonomía region
      */
     public static function ajax_get_cities() {
-        $estado = isset($_POST['estado']) ? sanitize_text_field($_POST['estado']) : '';
+        $estado_id = isset($_POST['estado']) ? intval($_POST['estado']) : 0;
 
-        if (empty($estado)) {
+        if (empty($estado_id)) {
             wp_send_json_error(array('message' => 'Estado no especificado.'));
         }
 
-        $ciudades = self::get_ciudades($estado);
+        // Obtener ciudades (términos hijos) del estado seleccionado desde taxonomía region
+        $ciudades_terms = get_terms(array(
+            'taxonomy' => 'region',
+            'hide_empty' => false,
+            'parent' => $estado_id
+        ));
+
+        if (is_wp_error($ciudades_terms)) {
+            wp_send_json_error(array('message' => 'Error al obtener ciudades.'));
+        }
+
+        // Formatear para compatibilidad con frontend
+        $ciudades = array();
+        foreach ($ciudades_terms as $ciudad_term) {
+            $ciudades[] = array(
+                'id' => $ciudad_term->term_id,
+                'name' => $ciudad_term->name
+            );
+        }
 
         wp_send_json_success(array('ciudades' => $ciudades));
     }

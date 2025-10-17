@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Read(//c/Users/Windows/Local Sites/fullday/app/public/wp-content/plugins/full-days/**)",
-      "Read(//c/Users/Windows/Local Sites/fullday/app/public/wp-content/plugins/**)"
+      "Read(//c/Users/Windows/Local Sites/fullday/app/public/wp-content/plugins/**)",
+      "Read(//c/Users/Windows/Local Sites/fullday/app/public/**)",
+      "Bash(php wp-cli.phar taxonomy:*)",
+      "Bash(php wp-cli.phar taxonomy:list:*)",
+      "Bash(php -r \"require ''wp-load.php''; $terms = get_terms([''taxonomy'' => ''region'', ''hide_empty'' => false, ''parent'' => 0]); foreach($terms as $term) { echo $term->term_id . '' - '' . $term->name . '' (parent: '' . $term->parent . '')'' . PHP_EOL; $children = get_terms([''taxonomy'' => ''region'', ''hide_empty'' => false, ''parent'' => $term->term_id]); foreach($children as $child) { echo ''  '' . $child->term_id . '' - '' . $child->name . PHP_EOL; }}\")"
     ],
     "deny": [],
     "ask": []
