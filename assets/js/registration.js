@@ -227,19 +227,14 @@
             e.preventDefault();
 
             // Obtener valores
-            const username = $('#username').val().trim();
             const email = $('#email').val().trim();
-            const whatsappPrefix = $('#whatsapp_prefix').val();
-            const whatsappNumber = $('#whatsapp_number').val().trim();
-            const estado = $('#estado').val();
-            const ciudad = $('#ciudad').val();
             const password = $('#password').val();
             const confirmPassword = $('#confirm_password').val();
             const userType = $('#user_type').val();
             const nonce = $('#fullday_register_nonce_field').val();
 
             // Validaciones básicas
-            if (!username || !email || !password || !confirmPassword || !estado || !ciudad) {
+            if (!email || !password || !confirmPassword) {
                 showError('Todos los campos obligatorios deben ser completados.');
                 return;
             }
@@ -254,18 +249,6 @@
                 return;
             }
 
-            // Validar WhatsApp si está presente
-            if (whatsappNumber && whatsappNumber.length !== 7) {
-                showError('El número de WhatsApp debe tener exactamente 7 dígitos.');
-                return;
-            }
-
-            // Validar documento para proveedor
-            if (userType === 'proveedor' && !uploadedDocumentoId) {
-                showError('Debes subir tu documento de identidad.');
-                return;
-            }
-
             // Mostrar loading
             showLoading();
 
@@ -276,16 +259,10 @@
                 data: {
                     action: 'fullday_register_user',
                     nonce: nonce,
-                    username: username,
                     email: email,
-                    whatsapp_prefix: whatsappPrefix,
-                    whatsapp_number: whatsappNumber,
-                    estado: estado,
-                    ciudad: ciudad,
                     password: password,
                     confirm_password: confirmPassword,
-                    user_type: userType,
-                    documento_id: uploadedDocumentoId
+                    user_type: userType
                 },
                 success: function(response) {
                     hideLoading();
