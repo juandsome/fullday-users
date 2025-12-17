@@ -7,6 +7,8 @@
     'use strict';
 
     $(document).ready(function() {
+        // Verificar que las variables estén disponibles
+        console.log('fulldayUsers:', typeof fulldayUsers !== 'undefined' ? fulldayUsers : 'NO DEFINIDO');
 
         // Submit del formulario
         $('#fullday-registration-form').on('submit', function(e) {
@@ -38,10 +40,18 @@
             // Mostrar loading
             showLoading();
 
+            // Determinar la URL AJAX correcta
+            const ajaxUrl = (typeof fulldayUsers !== 'undefined' && fulldayUsers.ajaxurl)
+                ? fulldayUsers.ajaxurl
+                : '/wp-admin/admin-ajax.php';
+
+            console.log('URL AJAX:', ajaxUrl);
+
             // AJAX para registro
             $.ajax({
-                url: fulldayUsers.ajaxurl,
+                url: ajaxUrl,
                 type: 'POST',
+                dataType: 'json',
                 data: {
                     action: 'fullday_register_user',
                     nonce: nonce,
@@ -66,6 +76,7 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Error AJAX:', xhr, status, error);
+                    console.error('Response text:', xhr.responseText);
                     hideLoading();
                     showError('Error de conexión. Intenta nuevamente.');
                 }
