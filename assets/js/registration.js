@@ -51,16 +51,21 @@
                     user_type: userType
                 },
                 success: function(response) {
+                    console.log('Respuesta del servidor:', response);
                     hideLoading();
 
-                    if (response.success) {
+                    if (response && response.success) {
                         // Redirigir al dashboard
                         window.location.href = response.data.redirect;
                     } else {
-                        showError(response.data.message || 'Error al registrar el usuario.');
+                        const errorMsg = (response && response.data && response.data.message)
+                            ? response.data.message
+                            : 'Error al registrar el usuario.';
+                        showError(errorMsg);
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('Error AJAX:', xhr, status, error);
                     hideLoading();
                     showError('Error de conexión. Intenta nuevamente.');
                 }
