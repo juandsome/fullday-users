@@ -35,6 +35,10 @@ $banner_url = $banner_id ? wp_get_attachment_url($banner_id) : '';
 $initials = Fullday_Users_Dashboard::get_user_initials($user_id);
 $approved = get_user_meta($user_id, 'proveedor_approved', true);
 $is_approved = ($approved === '1' || $approved === 1);
+
+// Generar URL del perfil público
+$profile_slug = $empresa ? sanitize_title($empresa) : sanitize_title($user->user_login);
+$profile_url = home_url('/perfil/' . $profile_slug . '/');
 ?>
 
 <div class="perfil-container">
@@ -49,6 +53,27 @@ $is_approved = ($approved === '1' || $approved === 1);
     <!-- Preview del Banner -->
     <div class="banner-preview-section">
         <p class="section-description">Así se verá tu banner para los clientes</p>
+
+        <!-- Botón de copiar link del perfil -->
+        <div class="profile-link-section">
+            <div class="profile-link-container">
+                <div class="profile-link-preview">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    <span class="profile-link-url"><?php echo esc_html($profile_url); ?></span>
+                </div>
+                <button type="button" class="btn-copy-profile-link" id="btn-copy-profile-link" data-url="<?php echo esc_attr($profile_url); ?>">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span class="btn-copy-text">Copiar link</span>
+                    <span class="btn-copied-text" style="display: none;">¡Copiado!</span>
+                </button>
+            </div>
+        </div>
 
         <div class="proveedor-banner-preview">
             <div class="banner-image" id="banner-preview-display" style="background-image: url('<?php echo $banner_url ? esc_url($banner_url) : ''; ?>');">

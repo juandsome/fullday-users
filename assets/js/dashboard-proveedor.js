@@ -421,6 +421,30 @@
             btn.find('.btn-text').show();
             btn.find('.btn-loader').hide();
         }
+
+        // Copiar link del perfil
+        $('#btn-copy-profile-link').on('click', function() {
+            const btn = $(this);
+            const url = btn.data('url');
+
+            // Copiar al portapapeles
+            navigator.clipboard.writeText(url).then(function() {
+                // Cambiar texto del botón
+                btn.addClass('copied');
+                btn.find('.btn-copy-text').hide();
+                btn.find('.btn-copied-text').show();
+
+                // Restaurar después de 2 segundos
+                setTimeout(function() {
+                    btn.removeClass('copied');
+                    btn.find('.btn-copy-text').show();
+                    btn.find('.btn-copied-text').hide();
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Error al copiar:', err);
+                alert('No se pudo copiar el enlace. Por favor, cópialo manualmente.');
+            });
+        });
     });
 
 })(jQuery);
