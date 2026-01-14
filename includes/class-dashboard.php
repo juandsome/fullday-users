@@ -104,10 +104,8 @@ class Fullday_Users_Dashboard {
         ob_start();
         ?>
         <div class="fullday-proveedor-banner-public">
-            <div class="banner-image-public" style="background-image: url('<?php echo $banner_url ? esc_url($banner_url) : ''; ?>');">
-                <?php if (!$banner_url): ?>
-                    <div class="banner-placeholder-public"></div>
-                <?php endif; ?>
+            <div class="banner-image-public" style="background-image: url('<?php echo $banner_url ? esc_url($banner_url) : 'https://fulldayvenezuela.com/wp-content/uploads/2026/01/Gemini_Generated_Image_73nd8o73nd8o73nd-1.png'; ?>');">
+               
             </div>
             <div class="banner-content-public">
                 <div class="banner-avatar-public">
@@ -232,10 +230,8 @@ class Fullday_Users_Dashboard {
         ob_start();
         ?>
         <div class="fullday-proveedor-banner-public fullday-author-banner">
-            <div class="banner-image-public" style="background-image: url('<?php echo $banner_url ? esc_url($banner_url) : ''; ?>');">
-                <?php if (!$banner_url): ?>
-                    <div class="banner-placeholder-public"></div>
-                <?php endif; ?>
+            <div class="banner-image-public" style="background-image: url('<?php echo $banner_url ? esc_url($banner_url) : 'https://fulldayvenezuela.com/wp-content/uploads/2026/01/Gemini_Generated_Image_73nd8o73nd8o73nd-1.png'; ?>');">
+               
             </div>
             <div class="banner-content-public">
                 <div class="banner-avatar-public">

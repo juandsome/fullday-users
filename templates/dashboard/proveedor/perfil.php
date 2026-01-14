@@ -76,7 +76,7 @@ $profile_url = home_url('/perfil/' . $profile_slug . '/');
         </div>
 
         <div class="proveedor-banner-preview">
-            <div class="banner-image" id="banner-preview-display" style="background-image: url('<?php echo $banner_url ? esc_url($banner_url) : ''; ?>');">
+            <div class="banner-image" id="banner-preview-display" style="background-image: url('<?php echo $banner_url ? esc_url($banner_url) : 'https://fulldayvenezuela.com/wp-content/uploads/2026/01/Gemini_Generated_Image_73nd8o73nd8o73nd-1.png'; ?>');">
                 <?php if (!$banner_url): ?>
                     <div class="banner-placeholder">
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
