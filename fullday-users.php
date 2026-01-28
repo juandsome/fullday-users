@@ -3,7 +3,7 @@
  * Plugin Name: Fullday Users
  * Plugin URI: https://fullday.com
  * Description: Sistema de registro y gestión de usuarios cliente y proveedor para Fullday
- * Version: 1.0.3
+ * Version: 1.0.0
  * Author: Fullday Team
  * Author URI: https://fullday.com
  * Text Domain: fullday-users
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Definir constantes del plugin
-define('FULLDAY_USERS_VERSION', '1.0.3');
+define('FULLDAY_USERS_VERSION', '1.0.0');
 define('FULLDAY_USERS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FULLDAY_USERS_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FULLDAY_USERS_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -59,6 +59,7 @@ class Fullday_Users_Plugin {
         require_once FULLDAY_USERS_PLUGIN_DIR . 'includes/class-locations.php';
         require_once FULLDAY_USERS_PLUGIN_DIR . 'includes/class-admin.php';
         require_once FULLDAY_USERS_PLUGIN_DIR . 'includes/class-favorites.php';
+        require_once FULLDAY_USERS_PLUGIN_DIR . 'includes/class-ai-chat.php';
     }
 
     /**
@@ -105,6 +106,7 @@ class Fullday_Users_Plugin {
         Fullday_Users_Registration::init();
         Fullday_Users_Dashboard::init();
         Fullday_Users_Locations::init();
+        Fullday_AI_Chat::init();
 
         // Inicializar admin solo en el backend
         if (is_admin()) {
@@ -162,6 +164,13 @@ class Fullday_Users_Plugin {
         wp_enqueue_style(
             'fullday-users-favoritos',
             FULLDAY_USERS_PLUGIN_URL . 'assets/css/favoritos.css',
+            array(),
+            FULLDAY_USERS_VERSION
+        );
+
+        wp_enqueue_style(
+            'fullday-users-ai-chat',
+            FULLDAY_USERS_PLUGIN_URL . 'assets/css/dashboard-ai-chat.css',
             array(),
             FULLDAY_USERS_VERSION
         );
@@ -231,49 +240,58 @@ class Fullday_Users_Plugin {
             true
         );
 
-        // Localizar script con datos de WordPress
-        wp_localize_script('fullday-users-registration', 'fulldayUsers', array(
-            'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('fullday_users_nonce'),
-            'pluginUrl' => FULLDAY_USERS_PLUGIN_URL
-        ));
+        wp_enqueue_script(
+            'fullday-users-ai-chat',
+            FULLDAY_USERS_PLUGIN_URL . 'assets/js/dashboard-ai-chat.js',
+            array('jquery'),
+            FULLDAY_USERS_VERSION,
+            true
+        );
 
-        wp_localize_script('fullday-users-dashboard-cliente', 'fulldayUsers', array(
+        // Datos compartidos para todos los scripts
+        $shared_data = array(
             'ajaxurl' => admin_url('admin-ajax.php'),
+            'ajaxUrl' => admin_url('admin-ajax.php'), // Ambas versiones por compatibilidad
             'nonce' => wp_create_nonce('fullday_users_nonce'),
-            'pluginUrl' => FULLDAY_USERS_PLUGIN_URL
-        ));
-
-        wp_localize_script('fullday-users-dashboard-proveedor', 'fulldayUsers', array(
-            'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('fullday_users_nonce'),
-            'pluginUrl' => FULLDAY_USERS_PLUGIN_URL
-        ));
-
-        wp_localize_script('fullday-users-dashboard-crear-editar', 'fulldayUsers', array(
-            'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('fullday_users_nonce'),
-            'pluginUrl' => FULLDAY_USERS_PLUGIN_URL
-        ));
-
-        wp_localize_script('fullday-users-dashboard-mis-viajes', 'fulldayUsers', array(
-            'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('fullday_users_nonce'),
-            'pluginUrl' => FULLDAY_USERS_PLUGIN_URL
-        ));
-
-        wp_localize_script('fullday-users-login', 'fulldayUsers', array(
-            'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('fullday_users_nonce'),
-            'pluginUrl' => FULLDAY_USERS_PLUGIN_URL
-        ));
-
-        wp_localize_script('fullday-users-favoritos', 'fulldayUsers', array(
-            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'pluginUrl' => FULLDAY_USERS_PLUGIN_URL,
             'homeUrl' => home_url(),
-            'nonce' => wp_create_nonce('fullday_users_nonce'),
-            'pluginUrl' => FULLDAY_USERS_PLUGIN_URL
+            'loginUrl' => home_url('/login')
+        );
+
+        // Datos adicionales para el chat de IA
+        $avatar_id = get_option('fullday_ai_avatar', '');
+        $user_id = get_current_user_id();
+        $empresa = get_user_meta($user_id, 'empresa', true);
+        $user = get_userdata($user_id);
+        $nombre_proveedor = !empty($empresa) ? $empresa : ($user ? $user->display_name : '');
+
+        $ai_data = array_merge($shared_data, array(
+            'fullyAvatarUrl' => $avatar_id ? wp_get_attachment_url($avatar_id) : '',
+            'typingMessages' => $this->get_typing_messages_array(),
+            'proveedorNombre' => $nombre_proveedor
         ));
+
+        // Localizar script con datos de WordPress
+        wp_localize_script('fullday-users-registration', 'fulldayUsers', $shared_data);
+        wp_localize_script('fullday-users-dashboard-cliente', 'fulldayUsers', $shared_data);
+        wp_localize_script('fullday-users-dashboard-proveedor', 'fulldayUsers', $shared_data);
+        wp_localize_script('fullday-users-dashboard-crear-editar', 'fulldayUsers', $shared_data);
+        wp_localize_script('fullday-users-dashboard-mis-viajes', 'fulldayUsers', $shared_data);
+        wp_localize_script('fullday-users-login', 'fulldayUsers', $shared_data);
+        wp_localize_script('fullday-users-favoritos', 'fulldayUsers', $shared_data);
+        wp_localize_script('fullday-users-ai-chat', 'fulldayUsers', $ai_data);
+    }
+
+    /**
+     * Obtener mensajes de escritura como array
+     */
+    private function get_typing_messages_array() {
+        $messages = get_option('fullday_ai_typing_messages', '');
+        if (empty($messages)) {
+            $messages = "Fully está pensando... 🤔\nFully está organizando las ideas... 💡\nFully está buscando las palabras perfectas... ✨\nFully está preparando algo genial... 🌟\nFully está armando la respuesta... 🎨\nFully está consultando su libreta... 📝\nFully está conectando los puntos... 🔗\nFully está poniendo todo bonito... 🎯\nFully está casi listo... ⏰\nFully está terminando los detalles... 🎁";
+        }
+        $lines = explode("\n", $messages);
+        return array_values(array_filter(array_map('trim', $lines)));
     }
 }
 

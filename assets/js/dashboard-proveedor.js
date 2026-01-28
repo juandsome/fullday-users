@@ -12,6 +12,9 @@
             const estado = $(this).val();
             const ciudadSelect = $('#ciudad');
 
+            console.log('=== DASHBOARD PROVEEDOR - Cambio de Estado ===');
+            console.log('Estado seleccionado:', estado);
+
             if (!estado) {
                 ciudadSelect.html('<option value="">Selecciona primero un estado</option>');
                 return;
@@ -20,21 +23,42 @@
             // Deshabilitar mientras carga
             ciudadSelect.html('<option value="">Cargando ciudades...</option>').prop('disabled', true);
 
+            // Determinar URL de AJAX con fallback
+            var ajaxUrl = '/wp-admin/admin-ajax.php';
+            if (typeof fulldayUsers !== 'undefined') {
+                if (fulldayUsers.ajaxurl) {
+                    ajaxUrl = fulldayUsers.ajaxurl;
+                } else if (fulldayUsers.ajaxUrl) {
+                    ajaxUrl = fulldayUsers.ajaxUrl;
+                }
+            }
+
+            console.log('URL AJAX para ciudades:', ajaxUrl);
+
             // AJAX para obtener ciudades
             $.ajax({
-                url: fulldayUsers.ajaxurl,
+                url: ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'fullday_get_cities',
                     estado: estado
                 },
                 success: function(response) {
+                    console.log('Respuesta ciudades:', response);
+
+                    if (typeof response === 'string') {
+                        console.error('ERROR: Respuesta es HTML, no JSON');
+                        console.log('Primeros 500 caracteres:', response.substring(0, 500));
+                        ciudadSelect.html('<option value="">Error de configuración</option>');
+                        return;
+                    }
+
                     if (response.success && response.data.ciudades) {
                         const ciudades = response.data.ciudades;
+                        console.log('Ciudades recibidas:', ciudades.length);
                         let options = '<option value="">Selecciona una ciudad</option>';
 
                         ciudades.forEach(function(ciudad) {
-                            // Ahora las ciudades vienen con id y name desde la taxonomía
                             options += '<option value="' + ciudad.id + '">' + ciudad.name + '</option>';
                         });
 
@@ -43,7 +67,8 @@
                         ciudadSelect.html('<option value="">No hay ciudades disponibles</option>');
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('Error en AJAX ciudades:', error);
                     ciudadSelect.html('<option value="">Error al cargar ciudades</option>');
                 }
             });
@@ -115,6 +140,9 @@
 
         // Función para subir avatar
         function uploadAvatar(file) {
+            console.log('=== UPLOAD AVATAR ===');
+            console.log('Archivo:', file.name, file.type, file.size);
+
             // Validar tipo
             const allowedTypes = ['image/jpeg', 'image/png'];
             if (!allowedTypes.includes(file.type)) {
@@ -129,10 +157,24 @@
                 return;
             }
 
+            // Determinar URL de AJAX y nonce con fallback
+            var ajaxUrl = '/wp-admin/admin-ajax.php';
+            var nonce = '';
+            if (typeof fulldayUsers !== 'undefined') {
+                if (fulldayUsers.ajaxurl) {
+                    ajaxUrl = fulldayUsers.ajaxurl;
+                } else if (fulldayUsers.ajaxUrl) {
+                    ajaxUrl = fulldayUsers.ajaxUrl;
+                }
+                nonce = fulldayUsers.nonce || '';
+            }
+
+            console.log('URL AJAX para avatar:', ajaxUrl);
+
             // Crear FormData
             const formData = new FormData();
             formData.append('action', 'fullday_upload_avatar');
-            formData.append('nonce', fulldayUsers.nonce);
+            formData.append('nonce', nonce);
             formData.append('avatar', file);
 
             // Mostrar loading
@@ -140,15 +182,23 @@
 
             // Upload AJAX
             $.ajax({
-                url: fulldayUsers.ajaxurl,
+                url: ajaxUrl,
                 type: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
                 success: function(response) {
+                    console.log('Respuesta upload avatar:', response);
                     $('#avatar-display').css('opacity', '1');
 
-                    if (response.success) {
+                    if (typeof response === 'string') {
+                        console.error('ERROR: Respuesta es HTML, no JSON');
+                        console.log('Primeros 500 caracteres:', response.substring(0, 500));
+                        showMessage('perfil', 'Error de configuración en upload de avatar', 'error');
+                        return;
+                    }
+
+                    if (response && response.success) {
                         // Actualizar avatar en sección de información personal
                         const avatarHtml = '<img src="' + response.data.url + '" alt="Avatar">';
                         $('#avatar-display').html(avatarHtml);
@@ -171,6 +221,9 @@
 
         // Función para subir banner
         function uploadBanner(file) {
+            console.log('=== UPLOAD BANNER ===');
+            console.log('Archivo:', file.name, file.type, file.size);
+
             // Validar tipo
             const allowedTypes = ['image/jpeg', 'image/png'];
             if (!allowedTypes.includes(file.type)) {
@@ -185,10 +238,24 @@
                 return;
             }
 
+            // Determinar URL de AJAX y nonce con fallback
+            var ajaxUrl = '/wp-admin/admin-ajax.php';
+            var nonce = '';
+            if (typeof fulldayUsers !== 'undefined') {
+                if (fulldayUsers.ajaxurl) {
+                    ajaxUrl = fulldayUsers.ajaxurl;
+                } else if (fulldayUsers.ajaxUrl) {
+                    ajaxUrl = fulldayUsers.ajaxUrl;
+                }
+                nonce = fulldayUsers.nonce || '';
+            }
+
+            console.log('URL AJAX para banner:', ajaxUrl);
+
             // Crear FormData
             const formData = new FormData();
             formData.append('action', 'fullday_upload_banner');
-            formData.append('nonce', fulldayUsers.nonce);
+            formData.append('nonce', nonce);
             formData.append('banner', file);
 
             // Mostrar loading
@@ -196,15 +263,23 @@
 
             // Upload AJAX
             $.ajax({
-                url: fulldayUsers.ajaxurl,
+                url: ajaxUrl,
                 type: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
                 success: function(response) {
+                    console.log('Respuesta upload banner:', response);
                     $('#banner-preview-display').css('opacity', '1');
 
-                    if (response.success) {
+                    if (typeof response === 'string') {
+                        console.error('ERROR: Respuesta es HTML, no JSON');
+                        console.log('Primeros 500 caracteres:', response.substring(0, 500));
+                        showMessage('perfil', 'Error de configuración en upload de banner', 'error');
+                        return;
+                    }
+
+                    if (response && response.success) {
                         // Actualizar banner en el preview
                         $('#banner-preview-display').css('background-image', 'url(' + response.data.url + ')');
                         $('#banner-preview-display').find('.banner-placeholder').remove();
@@ -421,30 +496,6 @@
             btn.find('.btn-text').show();
             btn.find('.btn-loader').hide();
         }
-
-        // Copiar link del perfil
-        $('#btn-copy-profile-link').on('click', function() {
-            const btn = $(this);
-            const url = btn.data('url');
-
-            // Copiar al portapapeles
-            navigator.clipboard.writeText(url).then(function() {
-                // Cambiar texto del botón
-                btn.addClass('copied');
-                btn.find('.btn-copy-text').hide();
-                btn.find('.btn-copied-text').show();
-
-                // Restaurar después de 2 segundos
-                setTimeout(function() {
-                    btn.removeClass('copied');
-                    btn.find('.btn-copy-text').show();
-                    btn.find('.btn-copied-text').hide();
-                }, 2000);
-            }).catch(function(err) {
-                console.error('Error al copiar:', err);
-                alert('No se pudo copiar el enlace. Por favor, cópialo manualmente.');
-            });
-        });
     });
 
 })(jQuery);

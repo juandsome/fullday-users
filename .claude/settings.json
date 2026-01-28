@@ -1,0 +1,12 @@
+{
+  "enabledPlugins": {
+    "example-plugin@claude-plugins-official": true,
+    "everything-claude-code@everything-claude-code": true,
+    "frontend-design@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "serena@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "ralph-wiggum@claude-plugins-official": true
+  }
+}

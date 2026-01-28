@@ -42,6 +42,15 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'perfil
             </svg>
             Crear
         </button>
+        <button class="dashboard-tab <?php echo $current_tab === 'crear-ia' ? 'active' : ''; ?>" data-tab="crear-ia">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                <circle cx="9" cy="10" r="1" fill="currentColor"></circle>
+                <circle cx="12" cy="10" r="1" fill="currentColor"></circle>
+                <circle cx="15" cy="10" r="1" fill="currentColor"></circle>
+            </svg>
+            Crear Full Day con IA
+        </button>
     </div>
 
     <div class="dashboard-content">
@@ -55,6 +64,10 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'perfil
 
         <div class="tab-content <?php echo ($current_tab === 'crear' || $current_tab === 'editar') ? 'active' : ''; ?>" id="crear-editar-tab">
             <?php include FULLDAY_USERS_PLUGIN_DIR . 'templates/dashboard/proveedor/crear-editar.php'; ?>
+        </div>
+
+        <div class="tab-content <?php echo $current_tab === 'crear-ia' ? 'active' : ''; ?>" id="crear-ia-tab">
+            <?php include FULLDAY_USERS_PLUGIN_DIR . 'templates/dashboard/proveedor/crear-ia.php'; ?>
         </div>
     </div>
 </div>

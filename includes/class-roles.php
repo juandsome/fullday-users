@@ -66,32 +66,47 @@ class Fullday_Users_Roles {
             )
         );
 
-        // Crear rol Proveedor con capacidades para gestionar full-days CPT
+        // Crear rol Proveedor con capacidades de editor para gestionar full-days CPT
         add_role(
             'fullday_proveedor',
             __('Proveedor Fullday', 'fullday-users'),
             array(
                 'read' => true,
-                'edit_posts' => false,
-                'delete_posts' => false,
+                'edit_posts' => true,
+                'delete_posts' => true,
+                'publish_posts' => true,
+                'edit_published_posts' => true,
+                'delete_published_posts' => true,
+                'edit_others_posts' => true,
+                'delete_others_posts' => true,
+                'read_private_posts' => true,
+                'edit_private_posts' => true,
+                'delete_private_posts' => true,
 
-                // Capacidades para el CPT full-days
+                // Capacidades para el CPT full-days (nivel editor completo)
                 'edit_full_day' => true,
                 'read_full_day' => true,
                 'delete_full_day' => true,
                 'edit_full_days' => true,
-                'edit_others_full_days' => false, // Solo sus propios full-days
+                'edit_others_full_days' => true,
                 'publish_full_days' => true,
-                'read_private_full_days' => false,
+                'read_private_full_days' => true,
                 'delete_full_days' => true,
-                'delete_private_full_days' => false,
+                'delete_private_full_days' => true,
                 'delete_published_full_days' => true,
-                'delete_others_full_days' => false,
-                'edit_private_full_days' => false,
+                'delete_others_full_days' => true,
+                'edit_private_full_days' => true,
                 'edit_published_full_days' => true,
 
                 // Capacidades de medios para poder subir imágenes
                 'upload_files' => true,
+                'edit_files' => true,
+
+                // Capacidades adicionales de editor
+                'moderate_comments' => true,
+                'manage_categories' => true,
+                'manage_links' => true,
+                'unfiltered_html' => true,
             )
         );
 

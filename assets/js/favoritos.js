@@ -1,5 +1,5 @@
 /**
- * JavaScript para gestión de Favoritos
+ * JavaScript para gestiï¿½n de Favoritos
  * Fullday Users Plugin
  */
 
@@ -19,11 +19,11 @@ jQuery(document).ready(function($) {
 
         // Verificar que hay post ID
         if (!postId) {
-            console.error('No se encontró el ID del post');
+            console.error('No se encontrï¿½ el ID del post');
             return;
         }
 
-        // Deshabilitar botón mientras se procesa
+        // Deshabilitar botï¿½n mientras se procesa
         $btn.prop('disabled', true);
 
         // Hacer request AJAX
@@ -37,7 +37,7 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    // Actualizar estado del botón
+                    // Actualizar estado del botï¿½n
                     if (response.data.is_favorite) {
                         $btn.addClass('is-favorite');
                         $btn.attr('aria-label', 'Eliminar de favoritos');
@@ -47,13 +47,13 @@ jQuery(document).ready(function($) {
                         $btn.attr('aria-label', 'Agregar a favoritos');
                         $btn.attr('title', 'Agregar a favoritos');
 
-                        // Si estamos en la página de favoritos, remover la tarjeta con animación
+                        // Si estamos en la pï¿½gina de favoritos, remover la tarjeta con animaciï¿½n
                         if ($('.favoritos-container').length) {
                             const $card = $btn.closest('.favorito-card');
                             $card.fadeOut(300, function() {
                                 $(this).remove();
 
-                                // Si ya no hay más tarjetas, mostrar estado vacío
+                                // Si ya no hay mï¿½s tarjetas, mostrar estado vacï¿½o
                                 if ($('.favorito-card').length === 0) {
                                     showEmptyState();
                                 }
@@ -61,18 +61,28 @@ jQuery(document).ready(function($) {
                         }
                     }
 
-                    // Mostrar mensaje de éxito
+                    // Mostrar mensaje de ï¿½xito
                     showMessage(response.data.message, 'success');
                 } else {
-                    showMessage(response.data.message || 'Error al actualizar favoritos', 'error');
+                    // Si el error requiere login, abrir popup
+                    if (response.data && response.data.require_login) {
+                        if (typeof window.openFavoriteLoginPopup === 'function') {
+                            window.openFavoriteLoginPopup();
+                        } else {
+                            // Fallback: redirigir a la pï¿½gina de login
+                            window.location.href = fulldayUsers.loginUrl || '/login';
+                        }
+                    } else {
+                        showMessage(response.data.message || 'Error al actualizar favoritos', 'error');
+                    }
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Error AJAX:', error);
-                showMessage('Error de conexión. Intenta nuevamente.', 'error');
+                showMessage('Error de conexiï¿½n. Intenta nuevamente.', 'error');
             },
             complete: function() {
-                // Rehabilitar botón
+                // Rehabilitar botï¿½n
                 $btn.prop('disabled', false);
             }
         });
@@ -82,11 +92,11 @@ jQuery(document).ready(function($) {
      * Mostrar mensaje
      */
     function showMessage(message, type) {
-        // Buscar contenedor de mensajes en favoritos o crear uno genérico
+        // Buscar contenedor de mensajes en favoritos o crear uno genï¿½rico
         let $messageContainer = $('#favoritos-message');
 
         if (!$messageContainer.length) {
-            // Si no existe, buscar uno genérico o crearlo temporalmente
+            // Si no existe, buscar uno genï¿½rico o crearlo temporalmente
             $messageContainer = $('.form-message').first();
 
             if (!$messageContainer.length) {
@@ -112,7 +122,7 @@ jQuery(document).ready(function($) {
     }
 
     /**
-     * Mostrar estado vacío en favoritos
+     * Mostrar estado vacï¿½o en favoritos
      */
     function showEmptyState() {
         const emptyStateHTML = `
@@ -121,7 +131,7 @@ jQuery(document).ready(function($) {
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
                 <h3>No tienes favoritos guardados</h3>
-                <p>Explora nuestras experiencias y guarda tus favoritas para verlas más tarde</p>
+                <p>Explora nuestras experiencias y guarda tus favoritas para verlas mï¿½s tarde</p>
                 <a href="${fulldayUsers.homeUrl}/full-days" class="btn-primary">
                     Explorar Experiencias
                 </a>

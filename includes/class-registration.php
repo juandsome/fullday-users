@@ -42,8 +42,8 @@ class Fullday_Users_Registration {
      * Shortcode de registro
      */
     public static function registration_shortcode($atts) {
-        // Si el usuario ya está logueado, redirigir
-        if (is_user_logged_in()) {
+        // Si el usuario ya está logueado y NO es administrador, redirigir
+        if (is_user_logged_in() && !current_user_can('administrator')) {
             wp_redirect(home_url('/dashboard'));
             exit;
         }
@@ -52,16 +52,101 @@ class Fullday_Users_Registration {
         ?>
         <div class="fullday-registration-container">
             <div class="fullday-registration-box">
-                <h2 class="fullday-registration-title">Crear cuenta de Proveedor</h2>
-                <p class="fullday-registration-subtitle" id="fullday-registration-subtitle">Regístrate como proveedor</p>
+                <h2 class="fullday-registration-title">Crear cuenta</h2>
+                <p class="fullday-registration-subtitle" id="fullday-registration-subtitle">Regístrate como cliente</p>
+
+                <div class="fullday-registration-tabs">
+                    <button class="fullday-tab active" data-type="cliente">Cliente</button>
+                    <button class="fullday-tab" data-type="proveedor">Proveedor</button>
+                </div>
 
                 <form id="fullday-registration-form" class="fullday-registration-form">
                     <?php wp_nonce_field('fullday_register_nonce', 'fullday_register_nonce_field'); ?>
-                    <input type="hidden" name="user_type" id="user_type" value="proveedor">
+                    <input type="hidden" name="user_type" id="user_type" value="cliente">
+
+                    <div class="fullday-form-group">
+                        <label for="username">Nombre de usuario</label>
+                        <input type="text" id="username" name="username" placeholder="tu_usuario" required>
+                    </div>
 
                     <div class="fullday-form-group">
                         <label for="email">Correo electrónico</label>
                         <input type="email" id="email" name="email" placeholder="tu@email.com" required>
+                    </div>
+
+                    <div class="fullday-form-group">
+                        <label for="whatsapp">WhatsApp (opcional)</label>
+                        <div style="display: flex; gap: 10px;">
+                            <select id="whatsapp_prefix" name="whatsapp_prefix" style="width: 100px;">
+                                <option value="0412">0412</option>
+                                <option value="0416">0416</option>
+                                <option value="0426">0426</option>
+                                <option value="0424">0424</option>
+                                <option value="0414">0414</option>
+                            </select>
+                            <input type="text" id="whatsapp_number" name="whatsapp_number" placeholder="1234567" maxlength="7" pattern="[0-9]{7}" style="flex: 1;">
+                        </div>
+                        <small id="whatsapp-note" style="color: #666; font-size: 12px; display: none; margin-top: 5px;">Este número se usará de manera pública como WhatsApp.</small>
+                    </div>
+
+                    <div class="fullday-form-group">
+                        <label for="estado">Estado *</label>
+                        <select id="estado" name="estado" required>
+                            <option value="">Selecciona un estado</option>
+                            <?php
+                            // Obtener estados (términos padre) de la taxonomía region
+                            $estados_terms = get_terms(array(
+                                'taxonomy' => 'region',
+                                'hide_empty' => false,
+                                'parent' => 0,
+                                'orderby' => 'name',
+                                'order' => 'ASC'
+                            ));
+                            foreach ($estados_terms as $estado_term):
+                            ?>
+                                <option value="<?php echo esc_attr($estado_term->term_id); ?>"><?php echo esc_html($estado_term->name); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="fullday-form-group">
+                        <label for="ciudad_region">Ciudad *</label>
+                        <select id="ciudad_region" name="ciudad" required disabled>
+                            <option value="">Selecciona primero un estado</option>
+                        </select>
+                    </div>
+
+                    <!-- Mantener el viejo por compatibilidad pero oculto -->
+                    <select id="ciudad" name="ciudad_old" style="display:none;" disabled>
+                        <option value="">Old select - ignorar</option>
+                    </select>
+
+                    <!-- Campo de documento para proveedor (oculto por defecto) -->
+                    <div class="fullday-form-group" id="documento-group" style="display: none;">
+                        <label for="documento">Documento de Identidad (CI/RIF) (opcional)</label>
+                        <div class="fullday-documento-upload">
+                            <div class="documento-dropzone" id="documento-dropzone">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <p class="dropzone-text">Arrastra tu documento aquí</p>
+                                <p class="dropzone-subtext">o haz clic para seleccionar</p>
+                                <p class="dropzone-formats">JPG, PNG o PDF (máx. 5MB)</p>
+                            </div>
+                            <input type="file" id="documento" name="documento" accept="image/jpeg,image/png,application/pdf" style="display: none;">
+                            <input type="hidden" id="documento_id" name="documento_id">
+                            <div class="documento-preview" id="documento-preview" style="display: none;">
+                                <img src="" alt="Preview" id="documento-preview-img">
+                                <button type="button" class="documento-remove" id="documento-remove">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="fullday-form-group">
@@ -77,7 +162,7 @@ class Fullday_Users_Registration {
                     <div class="fullday-form-error" id="fullday-form-error" style="display: none;"></div>
 
                     <button type="submit" class="fullday-submit-btn" id="fullday-submit-btn">
-                        <span class="btn-text">Registrarse como Proveedor</span>
+                        <span class="btn-text">Registrarse como Cliente</span>
                         <span class="btn-loader" style="display: none;">
                             <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
                                 <circle class="spinner-circle" cx="12" cy="12" r="10" fill="none" stroke-width="3"></circle>
@@ -92,23 +177,102 @@ class Fullday_Users_Registration {
     }
 
     /**
+     * Enviar notificación al administrador sobre nuevo registro
+     */
+    private static function send_admin_notification($user_id, $user_type, $whatsapp, $estado, $ciudad, $documento_id) {
+        $user = get_userdata($user_id);
+        if (!$user) {
+            return;
+        }
+
+        // Obtener email del administrador
+        $admin_email = get_option('admin_email');
+
+        // Obtener nombres de estado y ciudad
+        $estado_term = get_term($estado, 'region');
+        $ciudad_term = get_term($ciudad, 'region');
+        $estado_nombre = $estado_term ? $estado_term->name : 'No especificado';
+        $ciudad_nombre = $ciudad_term ? $ciudad_term->name : 'No especificado';
+
+        // Tipo de usuario en español
+        $tipo_usuario = ($user_type === 'proveedor') ? 'Proveedor' : 'Cliente';
+
+        // Asunto del email
+        $subject = '[' . get_bloginfo('name') . '] Nuevo registro de ' . $tipo_usuario;
+
+        // Construir el mensaje
+        $message = "Se ha registrado un nuevo usuario en " . get_bloginfo('name') . "\n\n";
+        $message .= "=== DATOS DEL USUARIO ===\n\n";
+        $message .= "Tipo de usuario: " . $tipo_usuario . "\n";
+        $message .= "Nombre de usuario: " . $user->user_login . "\n";
+        $message .= "Email: " . $user->user_email . "\n";
+
+        if (!empty($whatsapp)) {
+            $message .= "WhatsApp: " . $whatsapp . "\n";
+        }
+
+        $message .= "Estado: " . $estado_nombre . "\n";
+        $message .= "Ciudad: " . $ciudad_nombre . "\n";
+
+        // Información adicional para proveedores
+        if ($user_type === 'proveedor') {
+            $message .= "\n=== INFORMACIÓN DEL PROVEEDOR ===\n\n";
+            $message .= "Estado de aprobación: Pendiente de aprobación\n";
+
+            if ($documento_id) {
+                $documento_url = wp_get_attachment_url($documento_id);
+                $message .= "Documento de identidad: " . $documento_url . "\n";
+            } else {
+                $message .= "Documento de identidad: No proporcionado\n";
+            }
+
+            $message .= "\nPara aprobar o gestionar este proveedor, accede a:\n";
+            $message .= admin_url('user-edit.php?user_id=' . $user_id) . "\n";
+        }
+
+        $message .= "\n=== ACCIONES ===\n\n";
+        $message .= "Ver perfil del usuario: " . admin_url('user-edit.php?user_id=' . $user_id) . "\n";
+        $message .= "Ver todos los usuarios: " . admin_url('users.php') . "\n";
+
+        $message .= "\n---\n";
+        $message .= "Este es un correo automático de " . get_bloginfo('name') . "\n";
+
+        // Headers del email
+        $headers = array('Content-Type: text/plain; charset=UTF-8');
+
+        // Enviar el email
+        wp_mail($admin_email, $subject, $message, $headers);
+    }
+
+    /**
      * AJAX handler para registro de usuario
      */
     public static function ajax_register_user() {
         check_ajax_referer('fullday_register_nonce', 'nonce');
 
+        $username = sanitize_user($_POST['username']);
         $email = sanitize_email($_POST['email']);
+        $whatsapp_prefix = isset($_POST['whatsapp_prefix']) ? sanitize_text_field($_POST['whatsapp_prefix']) : '';
+        $whatsapp_number = isset($_POST['whatsapp_number']) ? sanitize_text_field($_POST['whatsapp_number']) : '';
+        $whatsapp = ($whatsapp_prefix && $whatsapp_number) ? $whatsapp_prefix . $whatsapp_number : '';
+        $estado = sanitize_text_field($_POST['estado']);
+        $ciudad = sanitize_text_field($_POST['ciudad']);
         $password = $_POST['password'];
         $confirm_password = $_POST['confirm_password'];
         $user_type = sanitize_text_field($_POST['user_type']);
+        $documento_id = isset($_POST['documento_id']) ? intval($_POST['documento_id']) : 0;
 
-        // Validaciones básicas
-        if (empty($email) || empty($password)) {
+        // Validaciones
+        if (empty($username) || empty($email) || empty($password) || empty($estado) || empty($ciudad)) {
             wp_send_json_error(array('message' => 'Todos los campos obligatorios deben ser completados.'));
         }
 
         if (!is_email($email)) {
             wp_send_json_error(array('message' => 'El correo electrónico no es válido.'));
+        }
+
+        if (username_exists($username)) {
+            wp_send_json_error(array('message' => 'El nombre de usuario ya está en uso.'));
         }
 
         if (email_exists($email)) {
@@ -123,26 +287,12 @@ class Fullday_Users_Registration {
             wp_send_json_error(array('message' => 'La contraseña debe tener al menos 6 caracteres.'));
         }
 
-        // Solo permitir registro de proveedores
-        if ($user_type !== 'proveedor') {
-            wp_send_json_error(array('message' => 'Solo se permite el registro de proveedores.'));
-        }
-
-        // Generar username único a partir del email
-        $username = sanitize_user(current(explode('@', $email)));
-        $username_base = $username;
-        $counter = 1;
-        while (username_exists($username)) {
-            $username = $username_base . $counter;
-            $counter++;
-        }
-
         // Crear usuario
         $user_data = array(
             'user_login' => $username,
             'user_email' => $email,
             'user_pass' => $password,
-            'role' => 'fullday_proveedor'
+            'role' => ($user_type === 'proveedor') ? 'fullday_proveedor' : 'fullday_cliente'
         );
 
         $user_id = wp_insert_user($user_data);
@@ -151,8 +301,24 @@ class Fullday_Users_Registration {
             wp_send_json_error(array('message' => $user_id->get_error_message()));
         }
 
-        // Los proveedores comienzan APROBADOS
-        update_user_meta($user_id, 'proveedor_approved', '1');
+        // Guardar meta data
+        if (!empty($whatsapp)) {
+            update_user_meta($user_id, 'whatsapp', $whatsapp);
+        }
+
+        update_user_meta($user_id, 'estado', $estado);
+        update_user_meta($user_id, 'ciudad', $ciudad);
+
+        if ($user_type === 'proveedor') {
+            if ($documento_id) {
+                update_user_meta($user_id, 'documento_id', $documento_id);
+            }
+            // Los proveedores comienzan sin aprobar
+            update_user_meta($user_id, 'proveedor_approved', '0');
+        }
+
+        // Enviar notificación al administrador
+        self::send_admin_notification($user_id, $user_type, $whatsapp, $estado, $ciudad, $documento_id);
 
         // Auto login
         wp_set_current_user($user_id);
@@ -223,8 +389,8 @@ class Fullday_Users_Registration {
      * Shortcode de login
      */
     public static function login_shortcode($atts) {
-        // Si el usuario ya está logueado, redirigir
-        if (is_user_logged_in()) {
+        // Si el usuario ya está logueado y NO es administrador, redirigir
+        if (is_user_logged_in() && !current_user_can('administrator')) {
             wp_redirect(home_url('/dashboard'));
             exit;
         }

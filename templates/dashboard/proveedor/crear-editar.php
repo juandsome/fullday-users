@@ -46,8 +46,6 @@ $duration = '';
 $category = '';
 $min_age = '';
 $max_people = '';
-$phone_number = '';
-$whatsapp_message = '';
 $includes = '';
 $itinerary_items = array(array('time' => '', 'description' => ''));
 $featured_image_id = '';
@@ -91,8 +89,6 @@ if ($is_edit_mode) {
 
     $min_age = get_post_meta($post_id, 'full_days_min_age', true);
     $max_people = get_post_meta($post_id, 'full_days_max_people', true);
-    $phone_number = get_post_meta($post_id, 'full_days_phone_number', true);
-    $whatsapp_message = get_post_meta($post_id, 'full_days_whatsapp_message', true);
     $includes = get_post_meta($post_id, 'full_days_includes', true);
     $itinerary = get_post_meta($post_id, 'full_days_itinerary', true);
     $featured_image_id = get_post_thumbnail_id($post_id);
@@ -324,25 +320,10 @@ $gallery_data = (is_array($gallery) && !empty($gallery)) ? $gallery : array();
             <small class="field-hint">Selecciona hasta 3 ciudades en el orden de las paradas del viaje. Ej: Maracaibo → Cabimas → Ojeda</small>
         </div>
 
-        <!-- Máximo Participantes y Teléfono -->
-        <div class="form-row">
-            <div class="form-group">
-                <label for="fullday_max_people">Máximo Participantes *</label>
-                <input type="number" id="fullday_max_people" name="fullday_max_people" value="<?php echo esc_attr($max_people); ?>" placeholder="12" min="1" required>
-            </div>
-
-            <div class="form-group">
-                <label for="fullday_phone_number">Teléfono WhatsApp</label>
-                <input type="tel" id="fullday_phone_number" name="fullday_phone_number" value="<?php echo esc_attr($phone_number); ?>" placeholder="+593 99 123 4567">
-                <small class="field-hint">Número de contacto para reservas</small>
-            </div>
-        </div>
-
-        <!-- Mensaje WhatsApp -->
+        <!-- Máximo Participantes -->
         <div class="form-group">
-            <label for="fullday_whatsapp_message">Mensaje WhatsApp</label>
-            <textarea id="fullday_whatsapp_message" name="fullday_whatsapp_message" rows="3" placeholder="Hola, estoy interesado en el tour..."><?php echo esc_textarea($whatsapp_message); ?></textarea>
-            <small class="field-hint">Mensaje predeterminado opcional para WhatsApp</small>
+            <label for="fullday_max_people">Máximo Participantes *</label>
+            <input type="number" id="fullday_max_people" name="fullday_max_people" value="<?php echo esc_attr($max_people); ?>" placeholder="12" min="1" required>
         </div>
 
         <!-- Qué Incluye -->

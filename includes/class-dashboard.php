@@ -104,8 +104,10 @@ class Fullday_Users_Dashboard {
         ob_start();
         ?>
         <div class="fullday-proveedor-banner-public">
-            <div class="banner-image-public" style="background-image: url('<?php echo $banner_url ? esc_url($banner_url) : 'https://fulldayvenezuela.com/wp-content/uploads/2026/01/Gemini_Generated_Image_73nd8o73nd8o73nd-1.png'; ?>');">
-               
+            <div class="banner-image-public" style="background-image: url('<?php echo $banner_url ? esc_url($banner_url) : ''; ?>');">
+                <?php if (!$banner_url): ?>
+                    <div class="banner-placeholder-public"></div>
+                <?php endif; ?>
             </div>
             <div class="banner-content-public">
                 <div class="banner-avatar-public">
@@ -230,8 +232,10 @@ class Fullday_Users_Dashboard {
         ob_start();
         ?>
         <div class="fullday-proveedor-banner-public fullday-author-banner">
-            <div class="banner-image-public" style="background-image: url('<?php echo $banner_url ? esc_url($banner_url) : 'https://fulldayvenezuela.com/wp-content/uploads/2026/01/Gemini_Generated_Image_73nd8o73nd8o73nd-1.png'; ?>');">
-               
+            <div class="banner-image-public" style="background-image: url('<?php echo $banner_url ? esc_url($banner_url) : ''; ?>');">
+                <?php if (!$banner_url): ?>
+                    <div class="banner-placeholder-public"></div>
+                <?php endif; ?>
             </div>
             <div class="banner-content-public">
                 <div class="banner-avatar-public">
@@ -695,8 +699,6 @@ class Fullday_Users_Dashboard {
         $itinerary = sanitize_textarea_field($_POST['fullday_itinerary']);
         $featured_image_id = intval($_POST['featured_image_id']);
         $gallery_images_ids = sanitize_text_field($_POST['gallery_images_ids']);
-        $phone_number = isset($_POST['fullday_phone_number']) ? sanitize_text_field($_POST['fullday_phone_number']) : '';
-        $whatsapp_message = isset($_POST['fullday_whatsapp_message']) ? sanitize_textarea_field($_POST['fullday_whatsapp_message']) : '';
 
         if (empty($title) || empty($description) || empty($destination) || empty($duration)) {
             wp_send_json_error(array('message' => 'Por favor completa todos los campos obligatorios.'));
@@ -874,15 +876,6 @@ class Fullday_Users_Dashboard {
          * // 3. Ojeda
          */
 
-        // Guardar teléfono y mensaje WhatsApp del formulario
-        if (!empty($phone_number)) {
-            update_post_meta($post_id, 'full_days_phone_number', $phone_number);
-        }
-
-        if (!empty($whatsapp_message)) {
-            update_post_meta($post_id, 'full_days_whatsapp_message', $whatsapp_message);
-        }
-
         // Obtener redes sociales del proveedor
         $instagram = get_user_meta($user_id, 'instagram_url', true);
         if (!empty($instagram)) {
@@ -983,14 +976,6 @@ class Fullday_Users_Dashboard {
 
         if (!empty($_POST['fullday_itinerary'])) {
             update_post_meta($post_id, 'full_days_itinerary', sanitize_textarea_field($_POST['fullday_itinerary']));
-        }
-
-        if (!empty($_POST['fullday_phone_number'])) {
-            update_post_meta($post_id, 'full_days_phone_number', sanitize_text_field($_POST['fullday_phone_number']));
-        }
-
-        if (!empty($_POST['fullday_whatsapp_message'])) {
-            update_post_meta($post_id, 'full_days_whatsapp_message', sanitize_textarea_field($_POST['fullday_whatsapp_message']));
         }
 
         if (!empty($_POST['featured_image_id'])) {
@@ -1195,8 +1180,6 @@ class Fullday_Users_Dashboard {
         $itinerary = sanitize_textarea_field($_POST['fullday_itinerary']);
         $featured_image_id = intval($_POST['featured_image_id']);
         $gallery_images_ids = sanitize_text_field($_POST['gallery_images_ids']);
-        $phone_number = isset($_POST['fullday_phone_number']) ? sanitize_text_field($_POST['fullday_phone_number']) : '';
-        $whatsapp_message = isset($_POST['fullday_whatsapp_message']) ? sanitize_textarea_field($_POST['fullday_whatsapp_message']) : '';
 
         // Validar campos requeridos
         if (empty($title) || empty($description) || empty($destination) || empty($duration)) {
@@ -1241,19 +1224,6 @@ class Fullday_Users_Dashboard {
         update_post_meta($post_id, 'full_days_min_age', $min_age);
         update_post_meta($post_id, 'full_days_includes', $includes);
         update_post_meta($post_id, 'full_days_itinerary', $itinerary);
-
-        // Guardar teléfono y mensaje WhatsApp
-        if (!empty($phone_number)) {
-            update_post_meta($post_id, 'full_days_phone_number', $phone_number);
-        } else {
-            delete_post_meta($post_id, 'full_days_phone_number');
-        }
-
-        if (!empty($whatsapp_message)) {
-            update_post_meta($post_id, 'full_days_whatsapp_message', $whatsapp_message);
-        } else {
-            delete_post_meta($post_id, 'full_days_whatsapp_message');
-        }
 
         // Actualizar galería
         if (!empty($gallery_images_ids)) {

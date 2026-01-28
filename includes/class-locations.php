@@ -108,7 +108,9 @@ class Fullday_Users_Locations {
         $ciudades_terms = get_terms(array(
             'taxonomy' => 'region',
             'hide_empty' => false,
-            'parent' => $estado_id
+            'parent' => $estado_id,
+            'orderby' => 'name',
+            'order' => 'ASC'
         ));
 
         if (is_wp_error($ciudades_terms)) {

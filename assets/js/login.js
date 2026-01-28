@@ -72,15 +72,42 @@ jQuery(document).ready(function($) {
             data: formData,
             success: function(response) {
                 console.log('AJAX Success response:', response);
+                console.log('Response type:', typeof response);
 
-                if (response.success) {
+                // Verificar si la respuesta es HTML en lugar de JSON
+                if (typeof response === 'string') {
+                    console.error('✗ Respuesta es HTML, no JSON. Revisa la URL de AJAX.');
+                    console.log('Primeros 500 caracteres:', response.substring(0, 500));
+                    $errorDiv.text('Error de configuración. La URL de AJAX no es correcta.').show();
+                    $submitBtn.prop('disabled', false);
+                    $btnText.show();
+                    $btnLoader.hide();
+                    return;
+                }
+
+                if (response && response.success) {
                     // Login exitoso
-                    console.log('✓ Login exitoso, redirigiendo a:', response.data.redirect);
-                    window.location.href = response.data.redirect;
+                    var redirectUrl = response.data && response.data.redirect
+                        ? response.data.redirect
+                        : '/dashboard';
+
+                    console.log('✓ Login exitoso, redirigiendo a:', redirectUrl);
+
+                    // Emitir evento personalizado para que el popup lo detecte
+                    var loginEvent = new CustomEvent('fullday_login_success', {
+                        detail: { redirect: redirectUrl }
+                    });
+                    document.dispatchEvent(loginEvent);
+
+                    // Pequeño delay antes de redirigir para permitir que el popup se cierre
+                    setTimeout(function() {
+                        console.log('Ejecutando redirección a:', redirectUrl);
+                        window.location.href = redirectUrl;
+                    }, 300);
                 } else {
                     // Mostrar error
                     console.log('✗ Login fallido:', response);
-                    var errorMessage = (response.data && response.data.message)
+                    var errorMessage = (response && response.data && response.data.message)
                         ? response.data.message
                         : 'Error al iniciar sesión. Por favor intenta de nuevo.';
                     $errorDiv.text(errorMessage).show();

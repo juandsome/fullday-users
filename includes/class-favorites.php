@@ -28,10 +28,14 @@ class Fullday_Favorites {
     public function __construct() {
         // AJAX handlers
         add_action('wp_ajax_toggle_favorite', array($this, 'ajax_toggle_favorite'));
+        add_action('wp_ajax_nopriv_toggle_favorite', array($this, 'ajax_toggle_favorite'));
         add_action('wp_ajax_get_favorites', array($this, 'ajax_get_favorites'));
 
         // Shortcode
         add_shortcode('fullday_favorite_button', array($this, 'favorite_button_shortcode'));
+
+        // Hook para agregar el popup de login al footer
+        add_action('wp_footer', array($this, 'render_login_popup'));
     }
 
     /**
@@ -118,7 +122,10 @@ class Fullday_Favorites {
 
         // Verificar usuario logueado
         if (!is_user_logged_in()) {
-            wp_send_json_error(array('message' => 'Debes iniciar sesión para guardar favoritos'));
+            wp_send_json_error(array(
+                'message' => 'Debes iniciar sesión para guardar favoritos',
+                'require_login' => true
+            ));
             return;
         }
 
@@ -209,6 +216,207 @@ class Fullday_Favorites {
         </button>
         <?php
         return ob_get_clean();
+    }
+
+    /**
+     * Renderizar popup de login para usuarios no logueados
+     */
+    public function render_login_popup() {
+        // Solo renderizar si el usuario NO está logueado
+        if (is_user_logged_in()) {
+            return;
+        }
+        ?>
+        <div id="fullday-favorite-login-popup" class="fullday-popup-overlay" style="display: none;">
+            <div class="fullday-popup-container">
+                <button type="button" class="fullday-popup-close" aria-label="Cerrar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+
+                <div class="fullday-popup-content">
+                    <div class="fullday-popup-header">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <h2>Inicia sesión para guardar favoritos</h2>
+                        <p>Accede a tu cuenta para guardar tus actividades favoritas y verlas cuando quieras.</p>
+                    </div>
+
+                    <?php echo do_shortcode('[fullday_login]'); ?>
+                </div>
+            </div>
+        </div>
+
+        <style>
+        .fullday-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .fullday-popup-overlay.active {
+            opacity: 1;
+        }
+
+        .fullday-popup-container {
+            background: #fff;
+            border-radius: 12px;
+            max-width: 480px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .fullday-popup-overlay.active .fullday-popup-container {
+            transform: translateY(0);
+        }
+
+        .fullday-popup-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            color: #666;
+            z-index: 10;
+            transition: color 0.2s ease;
+        }
+
+        .fullday-popup-close:hover {
+            color: #000;
+        }
+
+        .fullday-popup-content {
+            padding: 32px;
+        }
+
+        .fullday-popup-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .fullday-popup-header svg {
+            color: #ff6b6b;
+            margin-bottom: 16px;
+        }
+
+        .fullday-popup-header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin: 0 0 12px 0;
+        }
+
+        .fullday-popup-header p {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Ajustar el contenedor de login dentro del popup */
+        #fullday-favorite-login-popup .fullday-login-container {
+            padding: 0;
+            background: transparent;
+        }
+
+        #fullday-favorite-login-popup .fullday-login-box {
+            background: transparent;
+            box-shadow: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        #fullday-favorite-login-popup .fullday-login-title {
+            display: none;
+        }
+
+        #fullday-favorite-login-popup .fullday-login-subtitle {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .fullday-popup-content {
+                padding: 24px;
+            }
+
+            .fullday-popup-header h2 {
+                font-size: 20px;
+            }
+        }
+        </style>
+
+        <script>
+        (function() {
+            // Cerrar popup al hacer clic en el overlay o botón cerrar
+            document.addEventListener('click', function(e) {
+                const popup = document.getElementById('fullday-favorite-login-popup');
+                if (!popup) return;
+
+                if (e.target.classList.contains('fullday-popup-overlay') ||
+                    e.target.closest('.fullday-popup-close')) {
+                    popup.style.display = 'none';
+                    popup.classList.remove('active');
+                }
+            });
+
+            // Cerrar con tecla ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const popup = document.getElementById('fullday-favorite-login-popup');
+                    if (popup && popup.style.display !== 'none') {
+                        popup.style.display = 'none';
+                        popup.classList.remove('active');
+                    }
+                }
+            });
+
+            // Función para abrir el popup
+            window.openFavoriteLoginPopup = function() {
+                const popup = document.getElementById('fullday-favorite-login-popup');
+                if (popup) {
+                    popup.style.display = 'flex';
+                    // Delay para activar la animación
+                    setTimeout(function() {
+                        popup.classList.add('active');
+                    }, 10);
+                }
+            };
+
+            // Interceptar el evento de login exitoso para cerrar el popup y recargar
+            document.addEventListener('fullday_login_success', function() {
+                const popup = document.getElementById('fullday-favorite-login-popup');
+                if (popup) {
+                    popup.style.display = 'none';
+                    popup.classList.remove('active');
+                }
+                // Recargar la página para actualizar el estado de favoritos
+                setTimeout(function() {
+                    window.location.reload();
+                }, 500);
+            });
+        })();
+        </script>
+        <?php
     }
 }
 
