@@ -76,6 +76,7 @@ Fully está terminando los detalles... 🎁";
      */
     public static function register_settings() {
         register_setting('fullday_ai_settings', 'fullday_gemini_api_key');
+        register_setting('fullday_ai_settings', 'fullday_openai_api_key');
         register_setting('fullday_ai_settings', 'fullday_ai_avatar');
         register_setting('fullday_ai_settings', 'fullday_ai_typing_messages');
     }
@@ -92,6 +93,7 @@ Fully está terminando los detalles... 🎁";
         if (isset($_POST['fullday_ai_settings_nonce']) &&
             wp_verify_nonce($_POST['fullday_ai_settings_nonce'], 'fullday_ai_settings_action')) {
             update_option('fullday_gemini_api_key', sanitize_text_field($_POST['fullday_gemini_api_key']));
+            update_option('fullday_openai_api_key', sanitize_text_field($_POST['fullday_openai_api_key']));
 
             // Guardar avatar
             if (!empty($_POST['fullday_ai_avatar'])) {
@@ -107,6 +109,7 @@ Fully está terminando los detalles... 🎁";
         }
 
         $api_key = get_option('fullday_gemini_api_key', '');
+        $openai_api_key = get_option('fullday_openai_api_key', '');
         $avatar_id = get_option('fullday_ai_avatar', '');
         $typing_messages = get_option('fullday_ai_typing_messages', self::get_default_typing_messages());
         ?>
@@ -131,6 +134,23 @@ Fully está terminando los detalles... 🎁";
                                    placeholder="AIza...">
                             <p class="description">
                                 Obtén tu API Key gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">
+                            <label for="fullday_openai_api_key">API Key de OpenAI (DALL-E)</label>
+                        </th>
+                        <td>
+                            <input type="text"
+                                   id="fullday_openai_api_key"
+                                   name="fullday_openai_api_key"
+                                   value="<?php echo esc_attr($openai_api_key); ?>"
+                                   class="regular-text"
+                                   placeholder="sk-...">
+                            <p class="description">
+                                Para generar imágenes automáticamente. Obtén tu API Key en <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a>
                             </p>
                         </td>
                     </tr>
@@ -187,14 +207,26 @@ Fully está terminando los detalles... 🎁";
 
             <hr>
             <h2>Instrucciones</h2>
+            
+            <h3>1. Configurar Google Gemini (Requerido)</h3>
             <ol>
                 <li>Ve a <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
                 <li>Inicia sesión con tu cuenta de Google</li>
                 <li>Crea una nueva API Key</li>
                 <li>Copia la API Key y pégala en el campo de arriba</li>
-                <li>Guarda la configuración</li>
             </ol>
             <p><strong>Nota:</strong> Google Gemini Flash 2.5 tiene un límite gratuito generoso. Revisa los límites actuales en la documentación de Google.</p>
+            
+            <h3>2. Configurar OpenAI DALL-E (Requerido para generar imágenes automáticas)</h3>
+            <ol>
+                <li>Ve a <a href="https://platform.openai.com/signup" target="_blank">OpenAI Platform</a> y crea una cuenta</li>
+                <li>Agrega créditos (DALL-E 3 cuesta ~$0.04 USD por imagen 1024x1024)</li>
+                <li>Ve a <a href="https://platform.openai.com/api-keys" target="_blank">API Keys</a></li>
+                <li>Crea una nueva API Key</li>
+                <li>Copia la API Key y pégala en el campo de arriba</li>
+            </ol>
+            <p><strong>Importante:</strong> Sin la API Key de OpenAI, el sistema creará Full Days sin imágenes (el proveedor tendrá que agregarlas manualmente después).</p>
+            <p><strong>Costo estimado:</strong> ~$0.12 USD por Full Day (3 imágenes generadas automáticamente)</p>
         </div>
         <?php
     }
@@ -308,6 +340,20 @@ REGLAS ABSOLUTAS:
 
 IMPORTANTE: Cuando el usuario presione 'Guardar Full Day', generarás el JSON completando automáticamente cualquier información faltante.
 
+ANÁLISIS DE IMÁGENES:
+- El usuario puede adjuntar imágenes de folletos, flyers, capturas, fotos del destino, etc.
+- Cuando recibas imágenes, analízalas cuidadosamente para extraer:
+  * Precios (convierte a dólares si están en bolívares)
+  * Nombres de destinos y lugares
+  * Fechas
+  * Horarios e itinerarios
+  * Qué incluye el tour
+  * Información de contacto (redes sociales)
+  * Cualquier texto relevante visible en la imagen
+- Si detectas información en las imágenes, menciónala al usuario y pregúntale si es correcta
+- Usa la información de las imágenes para prellenar campos y facilitar el trabajo del proveedor
+- Si hay texto en otro idioma en las imágenes, tradúcelo al español
+
 INFORMACIÓN QUE NECESITAS RECOPILAR:
 - Título del Full Day (atractivo y descriptivo)
 - Descripción completa (mínimo 200 caracteres, máximo 1000)
@@ -343,8 +389,23 @@ Cuando recibas la instrucción de generar el JSON (esto sucede automáticamente 
   \"region_ids\": [123, 456],
   \"category\": \"Aventura\",
   \"instagram\": \"https://instagram.com/tuusuario\",
-  \"facebook\": \"https://facebook.com/tupagina\"
+  \"facebook\": \"https://facebook.com/tupagina\",
+  \"image_prompts\": [
+    \"Imagen 1 (Featured): Descripción detallada para generar la imagen destacada principal, paisaje amplio y atractivo del destino...\",
+    \"Imagen 2 (Gallery): Descripción detallada de una actividad específica del tour, personas disfrutando...\",
+    \"Imagen 3 (Gallery): Descripción detallada de otro aspecto del tour, gastronomía o experiencia cultural...\"
+  ]
 }
+
+IMPORTANTE SOBRE image_prompts:
+- SIEMPRE incluye el campo \"image_prompts\" con exactamente 3 descripciones
+- Cada descripción debe ser MUY DETALLADA (mínimo 50 palabras) para generar imágenes realistas
+- Describe: paisaje, colores, iluminación, personas, actividades, ambiente, estilo fotográfico
+- Usa lenguaje descriptivo rico: \"vibrante\", \"soleado\", \"montañas majestuosas\", etc.
+- La primera imagen (Featured) debe ser la más impactante y representativa del tour
+- Las otras 2 deben mostrar diferentes aspectos: actividades, gastronomía, cultura, naturaleza
+- Escribe en INGLÉS para mejores resultados en la generación
+- Ejemplo de descripción completa: \"A breathtaking wide-angle photograph of crystal clear turquoise waters at Los Roques, Venezuela, with white sand beaches in the foreground, small wooden boats floating peacefully, palm trees swaying gently, bright blue sky with few white clouds, golden hour lighting, vibrant colors, professional travel photography style, high resolution, ultra detailed\"
 
 REGLAS IMPORTANTES:
 - Sé amigable, profesional y útil
@@ -356,14 +417,16 @@ REGLAS IMPORTANTES:
 - Cuando recibas la orden de generar el JSON (el usuario presiona 'Guardar'):
   * COMPLETA AUTOMÁTICAMENTE cualquier campo faltante de forma coherente
   * Si no sabes algo, INVÉNTALO basándote en el contexto de la conversación
-  * Todos los campos requeridos DEBEN estar presentes
+  * Todos los campos requeridos DEBEN estar presentes (incluyendo image_prompts)
   * Usa valores realistas y típicos para el tipo de tour descrito
   * Responde ÚNICAMENTE con el JSON válido, sin explicaciones ni texto adicional
+  * SIEMPRE incluye 3 descripciones en image_prompts, muy detalladas y en INGLÉS
 - El itinerario debe tener al menos 3 paradas con horarios
 - El campo 'includes' debe tener al menos 3 items
 - Las fechas deben estar en formato YYYY-MM-DD
 - Los IDs de región deben existir en la lista proporcionada
-- La categoría debe ser una de las disponibles";
+- La categoría debe ser una de las disponibles
+- Los image_prompts son CRÍTICOS - sin ellos no se pueden generar las imágenes automáticamente";
 
         return $prompt;
     }
@@ -393,8 +456,15 @@ REGLAS IMPORTANTES:
 
         // Obtener mensaje del usuario
         $user_message = isset($_POST['message']) ? sanitize_text_field($_POST['message']) : '';
-        if (empty($user_message)) {
-            wp_send_json_error(array('message' => 'El mensaje no puede estar vacío.'));
+        
+        // Obtener imágenes si existen
+        $images = isset($_POST['images']) && !empty($_POST['images']) 
+            ? json_decode(stripslashes($_POST['images']), true) 
+            : array();
+
+        // Verificar que haya mensaje o imágenes
+        if (empty($user_message) && empty($images)) {
+            wp_send_json_error(array('message' => 'El mensaje o imágenes no pueden estar vacíos.'));
         }
 
         // Obtener nombre del proveedor
@@ -404,7 +474,7 @@ REGLAS IMPORTANTES:
         $conversation_history = isset($_POST['history']) ? json_decode(stripslashes($_POST['history']), true) : array();
 
         // Llamar a la API de Google Gemini
-        $response = self::call_gemini_api($api_key, $user_message, $conversation_history, $proveedor_nombre);
+        $response = self::call_gemini_api($api_key, $user_message, $conversation_history, $proveedor_nombre, $images);
 
         if (is_wp_error($response)) {
             wp_send_json_error(array('message' => $response->get_error_message()));
@@ -593,7 +663,7 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
     /**
      * Llamar a la API de Google Gemini
      */
-    private static function call_gemini_api($api_key, $user_message, $conversation_history = array(), $proveedor_nombre = '') {
+    private static function call_gemini_api($api_key, $user_message, $conversation_history = array(), $proveedor_nombre = '', $images = array()) {
         // Construir el contexto completo
         $system_prompt = self::get_system_prompt();
 
@@ -602,32 +672,77 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
             $system_prompt .= "\n\nINFORMACIÓN DEL PROVEEDOR:\nEstás ayudando a: {$proveedor_nombre}\nDiríjete al proveedor por este nombre cuando sea apropiado en la conversación.";
         }
 
-        // Construir el contenido completo
+        // Construir el contenido completo del historial
         $full_content = $system_prompt . "\n\n";
 
         // Agregar historial de conversación
         if (!empty($conversation_history)) {
             foreach ($conversation_history as $msg) {
                 $role = $msg['role'] === 'user' ? 'Usuario' : 'Asistente';
-                $full_content .= "{$role}: {$msg['content']}\n\n";
+                
+                // Si el contenido es un objeto (con texto e imágenes)
+                if (is_array($msg['content']) && isset($msg['content']['text'])) {
+                    $text = $msg['content']['text'];
+                    $has_images = !empty($msg['content']['images']);
+                    $full_content .= "{$role}: {$text}" . ($has_images ? " [Usuario adjuntó " . count($msg['content']['images']) . " imagen(es)]" : "") . "\n\n";
+                } else {
+                    // Contenido es string simple
+                    $full_content .= "{$role}: {$msg['content']}\n\n";
+                }
             }
         }
 
-        // Agregar mensaje actual
-        $full_content .= "Usuario: {$user_message}\n\nAsistente:";
-
+        // Preparar el mensaje actual
+        $full_content .= "Usuario: ";
+        
         // URL de la API de Google Gemini (Flash 2.5)
         $api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$api_key}";
+
+        // Construir parts (texto + imágenes si existen)
+        $parts = array();
+
+        // Agregar contexto y mensaje de texto
+        if (!empty($user_message)) {
+            $full_content .= $user_message;
+        }
+
+        // Si hay imágenes, agregar indicación
+        if (!empty($images)) {
+            $full_content .= (!empty($user_message) ? " " : "") . "[Usuario adjuntó " . count($images) . " imagen(es) - analízalas y extrae información relevante]";
+        }
+
+        $full_content .= "\n\nAsistente:";
+
+        // Agregar texto a parts
+        $parts[] = array('text' => $full_content);
+
+        // Agregar imágenes a parts si existen
+        if (!empty($images)) {
+            foreach ($images as $image) {
+                // Extraer el base64 puro (sin el prefijo data:image/...;base64,)
+                $image_data = $image['data'];
+                $mime_type = $image['type'];
+
+                // Si tiene el prefijo, quitarlo
+                if (preg_match('/^data:([^;]+);base64,(.+)$/', $image_data, $matches)) {
+                    $mime_type = $matches[1];
+                    $image_data = $matches[2];
+                }
+
+                $parts[] = array(
+                    'inline_data' => array(
+                        'mime_type' => $mime_type,
+                        'data' => $image_data
+                    )
+                );
+            }
+        }
 
         // Preparar el body de la petición
         $body = array(
             'contents' => array(
                 array(
-                    'parts' => array(
-                        array(
-                            'text' => $full_content
-                        )
-                    )
+                    'parts' => $parts
                 )
             ),
             'generationConfig' => array(
@@ -666,16 +781,97 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
     }
 
     /**
+     * Generar imágenes con DALL-E 3 de OpenAI
+     */
+    private static function generate_images_with_dalle($image_prompts) {
+        $openai_api_key = get_option('fullday_openai_api_key', '');
+        
+        if (empty($openai_api_key)) {
+            error_log('AI Chat - OpenAI API Key no configurada');
+            return new WP_Error('no_api_key', 'OpenAI API Key no está configurada');
+        }
+        
+        if (empty($image_prompts) || !is_array($image_prompts) || count($image_prompts) < 3) {
+            error_log('AI Chat - image_prompts inválido o insuficiente');
+            return new WP_Error('invalid_prompts', 'Se requieren al menos 3 descripciones de imágenes');
+        }
+        
+        error_log('=== GENERACIÓN DE IMÁGENES CON DALL-E 3 ===');
+        error_log('Total de imágenes a generar: ' . count($image_prompts));
+        
+        $generated_images = array();
+        $api_url = 'https://api.openai.com/v1/images/generations';
+        
+        foreach ($image_prompts as $index => $prompt) {
+            error_log('Generando imagen ' . ($index + 1) . '/' . count($image_prompts));
+            error_log('Prompt: ' . substr($prompt, 0, 100) . '...');
+            
+            $body = array(
+                'model' => 'dall-e-3',
+                'prompt' => $prompt,
+                'n' => 1,
+                'size' => '1024x1024',
+                'quality' => 'standard',
+                'response_format' => 'url'
+            );
+            
+            $response = wp_remote_post($api_url, array(
+                'headers' => array(
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer ' . $openai_api_key
+                ),
+                'body' => json_encode($body),
+                'timeout' => 60 // DALL-E puede tardar
+            ));
+            
+            if (is_wp_error($response)) {
+                error_log('Error en petición DALL-E: ' . $response->get_error_message());
+                continue;
+            }
+            
+            $response_code = wp_remote_retrieve_response_code($response);
+            $response_body = wp_remote_retrieve_body($response);
+            $data = json_decode($response_body, true);
+            
+            if ($response_code !== 200) {
+                $error_message = isset($data['error']['message']) ? $data['error']['message'] : 'Error desconocido';
+                error_log('Error de API DALL-E: ' . $error_message);
+                continue;
+            }
+            
+            if (isset($data['data'][0]['url'])) {
+                $image_url = $data['data'][0]['url'];
+                $generated_images[] = $image_url;
+                error_log('Imagen generada exitosamente: ' . $image_url);
+            }
+        }
+        
+        error_log('Total de imágenes generadas: ' . count($generated_images));
+        error_log('=== FIN GENERACIÓN DE IMÁGENES ===');
+        
+        if (empty($generated_images)) {
+            return new WP_Error('generation_failed', 'No se pudo generar ninguna imagen');
+        }
+        
+        return $generated_images;
+    }
+
+    /**
      * Crear Full Day desde JSON generado por la IA
      */
     private static function create_fullday_from_json($data, $user_id) {
         // Validar datos requeridos
-        $required_fields = array('title', 'description', 'destination', 'departure_date', 'duration', 'price', 'max_people', 'includes', 'itinerary', 'region_ids', 'category');
+        $required_fields = array('title', 'description', 'destination', 'departure_date', 'duration', 'price', 'max_people', 'includes', 'itinerary', 'region_ids', 'category', 'image_prompts');
 
         foreach ($required_fields as $field) {
             if (empty($data[$field])) {
                 return new WP_Error('missing_field', "Falta el campo requerido: {$field}");
             }
+        }
+        
+        // Validar que image_prompts tenga al menos 3 elementos
+        if (!is_array($data['image_prompts']) || count($data['image_prompts']) < 3) {
+            return new WP_Error('invalid_image_prompts', 'Se requieren al menos 3 descripciones de imágenes');
         }
 
         // Crear el post
@@ -742,8 +938,94 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
         // Asignar categoría
         wp_set_object_terms($post_id, sanitize_text_field($data['category']), 'full_days_category');
 
-        // Inicializar galería vacía (el proveedor deberá agregar imágenes manualmente después)
-        update_post_meta($post_id, 'full_days_gallery', array());
+        // GENERAR IMÁGENES CON DALL-E 3
+        error_log('=== INICIO GENERACIÓN Y GUARDADO DE IMÁGENES ===');
+        $image_urls = self::generate_images_with_dalle($data['image_prompts']);
+        
+        if (is_wp_error($image_urls)) {
+            error_log('Error al generar imágenes: ' . $image_urls->get_error_message());
+            // Continuar sin imágenes, el proveedor las agregará manualmente
+            update_post_meta($post_id, 'full_days_gallery', array());
+            return $post_id;
+        }
+        
+        // Descargar y subir imágenes a WordPress
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        require_once(ABSPATH . 'wp-admin/includes/image.php');
+        require_once(ABSPATH . 'wp-admin/includes/media.php');
+        
+        $featured_image_id = null;
+        $gallery_urls = array();
+        
+        foreach ($image_urls as $index => $image_url) {
+            error_log('Descargando imagen ' . ($index + 1) . '/' . count($image_urls));
+            error_log('URL: ' . $image_url);
+            
+            // Descargar imagen desde URL de DALL-E
+            $temp_file = download_url($image_url, 60);
+            
+            if (is_wp_error($temp_file)) {
+                error_log('Error al descargar imagen: ' . $temp_file->get_error_message());
+                continue;
+            }
+            
+            // Obtener tipo MIME
+            $file_type = wp_check_filetype(basename($image_url), null);
+            $wp_upload_dir = wp_upload_dir();
+            
+            // Mover a uploads
+            $filename = 'fullday-ai-' . $post_id . '-' . time() . '-' . $index . '.png';
+            $upload_path = $wp_upload_dir['path'] . '/' . $filename;
+            
+            rename($temp_file, $upload_path);
+            
+            // Crear attachment
+            $attachment = array(
+                'post_mime_type' => 'image/png',
+                'post_title' => sanitize_file_name(pathinfo($filename, PATHINFO_FILENAME)),
+                'post_content' => '',
+                'post_status' => 'inherit',
+                'post_author' => $user_id
+            );
+            
+            $attach_id = wp_insert_attachment($attachment, $upload_path, $post_id);
+            
+            if (is_wp_error($attach_id)) {
+                error_log('Error al crear attachment: ' . $attach_id->get_error_message());
+                @unlink($upload_path);
+                continue;
+            }
+            
+            error_log('Attachment ID creado: ' . $attach_id);
+            
+            // Generar metadata
+            $attach_data = wp_generate_attachment_metadata($attach_id, $upload_path);
+            wp_update_attachment_metadata($attach_id, $attach_data);
+            
+            // Obtener URL final
+            $url = wp_get_attachment_url($attach_id);
+            if ($url) {
+                error_log('URL guardada: ' . $url);
+                
+                // La PRIMERA imagen es la featured image
+                if ($index === 0) {
+                    set_post_thumbnail($post_id, $attach_id);
+                    $featured_image_id = $attach_id;
+                    error_log('Imagen establecida como FEATURED IMAGE');
+                } else {
+                    // Las demás van a la galería
+                    $gallery_urls[] = $url;
+                    error_log('Imagen agregada a GALLERY');
+                }
+            }
+        }
+        
+        error_log('Featured image ID: ' . ($featured_image_id ?: 'ninguno'));
+        error_log('Gallery URLs: ' . count($gallery_urls));
+        error_log('=== FIN PROCESAMIENTO DE IMÁGENES ===');
+        
+        // Guardar galería
+        update_post_meta($post_id, 'full_days_gallery', $gallery_urls);
 
         return $post_id;
     }
