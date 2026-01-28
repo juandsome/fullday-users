@@ -766,12 +766,17 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
     private static function generate_images_with_gemini($image_prompts, $api_key) {
         if (empty($api_key)) {
             error_log('AI Chat - Gemini API Key no configurada');
-            return new WP_Error('no_api_key', 'Gemini API Key no está configurada');
+            return new WP_Error('no_api_key', 'La API Key de Google Gemini no está configurada');
         }
         
-        if (empty($image_prompts) || !is_array($image_prompts) || count($image_prompts) < 3) {
-            error_log('AI Chat - image_prompts inválido o insuficiente');
-            return new WP_Error('invalid_prompts', 'Se requieren al menos 3 descripciones de imágenes');
+        if (empty($image_prompts) || !is_array($image_prompts)) {
+            error_log('AI Chat - image_prompts inválido: ' . print_r($image_prompts, true));
+            return new WP_Error('invalid_prompts', 'El campo image_prompts no es válido o está vacío');
+        }
+        
+        if (count($image_prompts) < 3) {
+            error_log('AI Chat - image_prompts insuficiente: solo ' . count($image_prompts) . ' prompts');
+            return new WP_Error('insufficient_prompts', 'Se requieren exactamente 3 descripciones de imágenes, solo se recibieron ' . count($image_prompts));
         }
         
         error_log('=== GENERACIÓN DE IMÁGENES CON GEMINI 2.5 FLASH IMAGE ===');
@@ -779,12 +784,16 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
         
         $generated_images = array();
         
-        // URL de Gemini Image API
-        $api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key={$api_key}";
+        // URL base de Gemini Image API (se agregará la clave en cada request)
+        $base_api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
         
-        foreach ($image_prompts as $index => $prompt) {
-            error_log('Generando imagen ' . ($index + 1) . '/' . count($image_prompts));
-            error_log('Prompt: ' . substr($prompt, 0, 100) . '...');
+        // Tomar solo las primeras 3 prompts
+        $prompts_to_use = array_slice($image_prompts, 0, 3);
+        
+        foreach ($prompts_to_use as $index => $prompt) {
+            error_log('');
+            error_log('--- Imagen ' . ($index + 1) . '/3 ---');
+            error_log('Prompt completo: ' . $prompt);
             
             // Preparar body según formato Gemini
             $body = array(
@@ -798,39 +807,100 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
                     )
                 ),
                 'generationConfig' => array(
-                    'temperature' => 0.7,
-                    'maxOutputTokens' => 2048
+                    'temperature' => 0.85,
+                    'topK' => 40,
+                    'topP' => 0.95,
+                    'maxOutputTokens' => 8192,
+                    'responseMimeType' => 'text/plain'
                 )
             );
             
-            // Realizar petición
+            $body_json = json_encode($body);
+            error_log('Request body size: ' . strlen($body_json) . ' bytes');
+            
+            // Construir URL con API key
+            $api_url = $base_api_url . '?key=' . $api_key;
+            
+            // Realizar petición con timeout extendido
             $response = wp_remote_post($api_url, array(
                 'headers' => array(
                     'Content-Type' => 'application/json'
                 ),
-                'body' => json_encode($body),
-                'timeout' => 60 // Generación de imágenes puede tardar
+                'body' => $body_json,
+                'timeout' => 90 // 90 segundos - generación de imágenes puede tardar
             ));
             
             if (is_wp_error($response)) {
-                error_log('Error en petición Gemini Image: ' . $response->get_error_message());
-                continue;
+                $error_message = $response->get_error_message();
+                error_log('ERROR en petición HTTP: ' . $error_message);
+                
+                return new WP_Error(
+                    'http_request_failed', 
+                    'Error al conectar con la API de Gemini: ' . $error_message
+                );
             }
             
             $response_code = wp_remote_retrieve_response_code($response);
             $response_body = wp_remote_retrieve_body($response);
-            $data = json_decode($response_body, true);
+            
+            error_log('Response code: ' . $response_code);
+            error_log('Response body length: ' . strlen($response_body) . ' bytes');
             
             if ($response_code !== 200) {
-                $error_message = isset($data['error']['message']) ? $data['error']['message'] : 'Error desconocido';
-                error_log('Error de API Gemini Image: ' . $error_message);
-                error_log('Response body: ' . $response_body);
-                continue;
+                error_log('ERROR - Response code no es 200');
+                error_log('Response body completo: ' . substr($response_body, 0, 500) . '...');
+                
+                $data = json_decode($response_body, true);
+                $error_message = 'Error de API (código ' . $response_code . ')';
+                
+                if (isset($data['error']['message'])) {
+                    $error_message .= ': ' . $data['error']['message'];
+                } elseif (isset($data['error'])) {
+                    $error_message .= ': ' . print_r($data['error'], true);
+                }
+                
+                error_log('Mensaje de error extraído: ' . $error_message);
+                
+                return new WP_Error(
+                    'api_error',
+                    'Error al generar imagen ' . ($index + 1) . ': ' . $error_message
+                );
+            }
+            
+            // Parsear respuesta
+            $data = json_decode($response_body, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log('ERROR al parsear JSON de respuesta: ' . json_last_error_msg());
+                error_log('Response body: ' . substr($response_body, 0, 500));
+                
+                return new WP_Error(
+                    'json_parse_error',
+                    'Error al parsear respuesta de la API para imagen ' . ($index + 1)
+                );
+            }
+            
+            // LOG de la estructura de respuesta
+            error_log('Estructura de respuesta: ' . print_r(array_keys($data), true));
+            if (isset($data['candidates'])) {
+                error_log('Número de candidates: ' . count($data['candidates']));
+                if (isset($data['candidates'][0])) {
+                    error_log('Candidate 0 keys: ' . print_r(array_keys($data['candidates'][0]), true));
+                    if (isset($data['candidates'][0]['content'])) {
+                        error_log('Content keys: ' . print_r(array_keys($data['candidates'][0]['content']), true));
+                        if (isset($data['candidates'][0]['content']['parts'])) {
+                            error_log('Número de parts: ' . count($data['candidates'][0]['content']['parts']));
+                        }
+                    }
+                }
             }
             
             // Buscar inline_data en la respuesta
+            $image_found = false;
             if (isset($data['candidates'][0]['content']['parts'])) {
-                foreach ($data['candidates'][0]['content']['parts'] as $part) {
+                foreach ($data['candidates'][0]['content']['parts'] as $part_index => $part) {
+                    error_log('Part ' . $part_index . ' keys: ' . print_r(array_keys($part), true));
+                    
                     if (isset($part['inline_data'])) {
                         // inline_data contiene el base64 de la imagen
                         $image_base64 = $part['inline_data']['data'];
@@ -841,18 +911,37 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
                             'mime_type' => $mime_type
                         );
                         
-                        error_log('Imagen generada exitosamente (base64)');
+                        error_log('✓ Imagen generada exitosamente');
+                        error_log('MIME type: ' . $mime_type);
+                        error_log('Base64 length: ' . strlen($image_base64) . ' chars');
+                        
+                        $image_found = true;
                         break; // Solo tomar la primera imagen del part
                     }
                 }
             }
+            
+            if (!$image_found) {
+                error_log('ERROR: No se encontró inline_data en la respuesta');
+                error_log('Response completo: ' . substr($response_body, 0, 1000));
+                
+                return new WP_Error(
+                    'no_image_data',
+                    'La API de Gemini respondió pero no incluyó datos de imagen para imagen ' . ($index + 1) . '. Verifica que el modelo gemini-2.5-flash-image esté disponible en tu región.'
+                );
+            }
         }
         
-        error_log('Total de imágenes generadas: ' . count($generated_images));
+        error_log('');
+        error_log('=== RESUMEN ===');
+        error_log('Total de imágenes generadas: ' . count($generated_images) . '/3');
         error_log('=== FIN GENERACIÓN DE IMÁGENES ===');
         
-        if (empty($generated_images)) {
-            return new WP_Error('generation_failed', 'No se pudo generar ninguna imagen');
+        if (count($generated_images) < 3) {
+            return new WP_Error(
+                'incomplete_generation', 
+                'Solo se generaron ' . count($generated_images) . ' de 3 imágenes necesarias'
+            );
         }
         
         return $generated_images;
@@ -873,7 +962,7 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
         
         // Validar que image_prompts tenga al menos 3 elementos
         if (!is_array($data['image_prompts']) || count($data['image_prompts']) < 3) {
-            return new WP_Error('invalid_image_prompts', 'Se requieren al menos 3 descripciones de imágenes');
+            return new WP_Error('invalid_image_prompts', 'Se requieren al menos 3 descripciones de imágenes en el campo image_prompts. Por favor, intenta nuevamente.');
         }
 
         // Crear el post
@@ -942,16 +1031,37 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
 
         // GENERAR IMÁGENES CON GEMINI 2.5 FLASH IMAGE
         error_log('=== INICIO GENERACIÓN Y GUARDADO DE IMÁGENES ===');
+        error_log('image_prompts recibido: ' . print_r($data['image_prompts'], true));
         
         $api_key = get_option('fullday_gemini_api_key', '');
         $image_data_array = self::generate_images_with_gemini($data['image_prompts'], $api_key);
         
         if (is_wp_error($image_data_array)) {
-            error_log('Error al generar imágenes: ' . $image_data_array->get_error_message());
-            // Continuar sin imágenes, el proveedor las agregará manualmente
-            update_post_meta($post_id, 'full_days_gallery', array());
-            return $post_id;
+            $error_msg = $image_data_array->get_error_message();
+            error_log('Error al generar imágenes: ' . $error_msg);
+            
+            // IMPORTANTE: Retornar error en lugar de continuar
+            // Eliminar el post creado ya que no se pudieron generar las imágenes
+            wp_delete_post($post_id, true);
+            
+            return new WP_Error(
+                'image_generation_failed', 
+                'No se pudieron generar las imágenes para el Full Day: ' . $error_msg . '. El Full Day no fue creado. Por favor, verifica tu API Key y vuelve a intentarlo.'
+            );
         }
+        
+        // Verificar que se generaron exactamente 3 imágenes
+        if (count($image_data_array) < 3) {
+            error_log('ADVERTENCIA: Solo se generaron ' . count($image_data_array) . ' imágenes de 3 esperadas');
+            wp_delete_post($post_id, true);
+            
+            return new WP_Error(
+                'insufficient_images', 
+                'Solo se generaron ' . count($image_data_array) . ' de 3 imágenes necesarias. El Full Day no fue creado. Por favor, intenta nuevamente.'
+            );
+        }
+        
+        error_log('Se generaron ' . count($image_data_array) . ' imágenes exitosamente');
         
         // Procesar y guardar imágenes en WordPress
         require_once(ABSPATH . 'wp-admin/includes/file.php');
@@ -1038,7 +1148,19 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
         
         error_log('Featured image ID: ' . ($featured_image_id ?: 'ninguno'));
         error_log('Gallery URLs: ' . count($gallery_urls));
-        error_log('=== FIN PROCESAMIENTO DE IMÁGENES ===');
+        
+        // Verificar que las imágenes se hayan guardado correctamente
+        if (!$featured_image_id || count($gallery_urls) < 2) {
+            error_log('ERROR: No se pudieron guardar todas las imágenes');
+            wp_delete_post($post_id, true);
+            
+            return new WP_Error(
+                'image_save_failed', 
+                'Las imágenes se generaron pero no se pudieron guardar correctamente. El Full Day no fue creado. Por favor, verifica los permisos de escritura e intenta nuevamente.'
+            );
+        }
+        
+        error_log('=== FIN PROCESAMIENTO DE IMÁGENES - EXITOSO ===');
         
         // Guardar galería
         update_post_meta($post_id, 'full_days_gallery', $gallery_urls);

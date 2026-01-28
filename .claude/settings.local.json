@@ -39,7 +39,11 @@
       "mcp__plugin_serena_serena__find_file",
       "Bash(wp post list:*)",
       "Bash(wp post meta get:*)",
-      "Bash(wp post delete:*)"
+      "Bash(wp post delete:*)",
+      "Skill(wordpress-plugin-core)",
+      "WebSearch",
+      "WebFetch(domain:ai.google.dev)",
+      "WebFetch(domain:blog.laozhang.ai)"
     ]
   }
 }
