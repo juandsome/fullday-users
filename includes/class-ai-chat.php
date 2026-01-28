@@ -76,7 +76,6 @@ Fully está terminando los detalles... 🎁";
      */
     public static function register_settings() {
         register_setting('fullday_ai_settings', 'fullday_gemini_api_key');
-        register_setting('fullday_ai_settings', 'fullday_openai_api_key');
         register_setting('fullday_ai_settings', 'fullday_ai_avatar');
         register_setting('fullday_ai_settings', 'fullday_ai_typing_messages');
     }
@@ -93,7 +92,6 @@ Fully está terminando los detalles... 🎁";
         if (isset($_POST['fullday_ai_settings_nonce']) &&
             wp_verify_nonce($_POST['fullday_ai_settings_nonce'], 'fullday_ai_settings_action')) {
             update_option('fullday_gemini_api_key', sanitize_text_field($_POST['fullday_gemini_api_key']));
-            update_option('fullday_openai_api_key', sanitize_text_field($_POST['fullday_openai_api_key']));
 
             // Guardar avatar
             if (!empty($_POST['fullday_ai_avatar'])) {
@@ -109,7 +107,6 @@ Fully está terminando los detalles... 🎁";
         }
 
         $api_key = get_option('fullday_gemini_api_key', '');
-        $openai_api_key = get_option('fullday_openai_api_key', '');
         $avatar_id = get_option('fullday_ai_avatar', '');
         $typing_messages = get_option('fullday_ai_typing_messages', self::get_default_typing_messages());
         ?>
@@ -134,23 +131,7 @@ Fully está terminando los detalles... 🎁";
                                    placeholder="AIza...">
                             <p class="description">
                                 Obtén tu API Key gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>
-                            </p>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th scope="row">
-                            <label for="fullday_openai_api_key">API Key de OpenAI (DALL-E)</label>
-                        </th>
-                        <td>
-                            <input type="text"
-                                   id="fullday_openai_api_key"
-                                   name="fullday_openai_api_key"
-                                   value="<?php echo esc_attr($openai_api_key); ?>"
-                                   class="regular-text"
-                                   placeholder="sk-...">
-                            <p class="description">
-                                Para generar imágenes automáticamente. Obtén tu API Key en <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a>
+                                <br><strong>Esta misma API Key se usa para conversación Y generación de imágenes automáticas</strong>
                             </p>
                         </td>
                     </tr>
@@ -208,25 +189,24 @@ Fully está terminando los detalles... 🎁";
             <hr>
             <h2>Instrucciones</h2>
             
-            <h3>1. Configurar Google Gemini (Requerido)</h3>
+            <h3>Configurar Google Gemini</h3>
             <ol>
                 <li>Ve a <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
                 <li>Inicia sesión con tu cuenta de Google</li>
                 <li>Crea una nueva API Key</li>
                 <li>Copia la API Key y pégala en el campo de arriba</li>
+                <li>¡Listo! Esta misma API Key se usa para todo</li>
             </ol>
-            <p><strong>Nota:</strong> Google Gemini Flash 2.5 tiene un límite gratuito generoso. Revisa los límites actuales en la documentación de Google.</p>
             
-            <h3>2. Configurar OpenAI DALL-E (Requerido para generar imágenes automáticas)</h3>
-            <ol>
-                <li>Ve a <a href="https://platform.openai.com/signup" target="_blank">OpenAI Platform</a> y crea una cuenta</li>
-                <li>Agrega créditos (DALL-E 3 cuesta ~$0.04 USD por imagen 1024x1024)</li>
-                <li>Ve a <a href="https://platform.openai.com/api-keys" target="_blank">API Keys</a></li>
-                <li>Crea una nueva API Key</li>
-                <li>Copia la API Key y pégala en el campo de arriba</li>
-            </ol>
-            <p><strong>Importante:</strong> Sin la API Key de OpenAI, el sistema creará Full Days sin imágenes (el proveedor tendrá que agregarlas manualmente después).</p>
-            <p><strong>Costo estimado:</strong> ~$0.12 USD por Full Day (3 imágenes generadas automáticamente)</p>
+            <h3>Capacidades</h3>
+            <ul>
+                <li>✅ <strong>Conversación con IA</strong> (Gemini 2.5 Flash)</li>
+                <li>✅ <strong>Generación automática de 3 imágenes</strong> (Gemini 2.5 Flash Image)</li>
+                <li>✅ <strong>Análisis de imágenes adjuntas</strong> (Multimodal)</li>
+                <li>✅ <strong>GRATIS</strong> con límites generosos</li>
+            </ul>
+            
+            <p><strong>Nota:</strong> Las imágenes generadas incluyen marca de agua SynthID invisible que identifica el contenido como creado por IA.</p>
         </div>
         <?php
     }
@@ -781,14 +761,12 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
     }
 
     /**
-     * Generar imágenes con DALL-E 3 de OpenAI
+     * Generar imágenes con Gemini 2.5 Flash Image
      */
-    private static function generate_images_with_dalle($image_prompts) {
-        $openai_api_key = get_option('fullday_openai_api_key', '');
-        
-        if (empty($openai_api_key)) {
-            error_log('AI Chat - OpenAI API Key no configurada');
-            return new WP_Error('no_api_key', 'OpenAI API Key no está configurada');
+    private static function generate_images_with_gemini($image_prompts, $api_key) {
+        if (empty($api_key)) {
+            error_log('AI Chat - Gemini API Key no configurada');
+            return new WP_Error('no_api_key', 'Gemini API Key no está configurada');
         }
         
         if (empty($image_prompts) || !is_array($image_prompts) || count($image_prompts) < 3) {
@@ -796,36 +774,46 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
             return new WP_Error('invalid_prompts', 'Se requieren al menos 3 descripciones de imágenes');
         }
         
-        error_log('=== GENERACIÓN DE IMÁGENES CON DALL-E 3 ===');
+        error_log('=== GENERACIÓN DE IMÁGENES CON GEMINI 2.5 FLASH IMAGE ===');
         error_log('Total de imágenes a generar: ' . count($image_prompts));
         
         $generated_images = array();
-        $api_url = 'https://api.openai.com/v1/images/generations';
+        
+        // URL de Gemini Image API
+        $api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key={$api_key}";
         
         foreach ($image_prompts as $index => $prompt) {
             error_log('Generando imagen ' . ($index + 1) . '/' . count($image_prompts));
             error_log('Prompt: ' . substr($prompt, 0, 100) . '...');
             
+            // Preparar body según formato Gemini
             $body = array(
-                'model' => 'dall-e-3',
-                'prompt' => $prompt,
-                'n' => 1,
-                'size' => '1024x1024',
-                'quality' => 'standard',
-                'response_format' => 'url'
+                'contents' => array(
+                    array(
+                        'parts' => array(
+                            array(
+                                'text' => $prompt
+                            )
+                        )
+                    )
+                ),
+                'generationConfig' => array(
+                    'temperature' => 0.7,
+                    'maxOutputTokens' => 2048
+                )
             );
             
+            // Realizar petición
             $response = wp_remote_post($api_url, array(
                 'headers' => array(
-                    'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer ' . $openai_api_key
+                    'Content-Type' => 'application/json'
                 ),
                 'body' => json_encode($body),
-                'timeout' => 60 // DALL-E puede tardar
+                'timeout' => 60 // Generación de imágenes puede tardar
             ));
             
             if (is_wp_error($response)) {
-                error_log('Error en petición DALL-E: ' . $response->get_error_message());
+                error_log('Error en petición Gemini Image: ' . $response->get_error_message());
                 continue;
             }
             
@@ -835,14 +823,28 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
             
             if ($response_code !== 200) {
                 $error_message = isset($data['error']['message']) ? $data['error']['message'] : 'Error desconocido';
-                error_log('Error de API DALL-E: ' . $error_message);
+                error_log('Error de API Gemini Image: ' . $error_message);
+                error_log('Response body: ' . $response_body);
                 continue;
             }
             
-            if (isset($data['data'][0]['url'])) {
-                $image_url = $data['data'][0]['url'];
-                $generated_images[] = $image_url;
-                error_log('Imagen generada exitosamente: ' . $image_url);
+            // Buscar inline_data en la respuesta
+            if (isset($data['candidates'][0]['content']['parts'])) {
+                foreach ($data['candidates'][0]['content']['parts'] as $part) {
+                    if (isset($part['inline_data'])) {
+                        // inline_data contiene el base64 de la imagen
+                        $image_base64 = $part['inline_data']['data'];
+                        $mime_type = $part['inline_data']['mime_type'];
+                        
+                        $generated_images[] = array(
+                            'data' => $image_base64,
+                            'mime_type' => $mime_type
+                        );
+                        
+                        error_log('Imagen generada exitosamente (base64)');
+                        break; // Solo tomar la primera imagen del part
+                    }
+                }
             }
         }
         
@@ -938,50 +940,64 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
         // Asignar categoría
         wp_set_object_terms($post_id, sanitize_text_field($data['category']), 'full_days_category');
 
-        // GENERAR IMÁGENES CON DALL-E 3
+        // GENERAR IMÁGENES CON GEMINI 2.5 FLASH IMAGE
         error_log('=== INICIO GENERACIÓN Y GUARDADO DE IMÁGENES ===');
-        $image_urls = self::generate_images_with_dalle($data['image_prompts']);
         
-        if (is_wp_error($image_urls)) {
-            error_log('Error al generar imágenes: ' . $image_urls->get_error_message());
+        $api_key = get_option('fullday_gemini_api_key', '');
+        $image_data_array = self::generate_images_with_gemini($data['image_prompts'], $api_key);
+        
+        if (is_wp_error($image_data_array)) {
+            error_log('Error al generar imágenes: ' . $image_data_array->get_error_message());
             // Continuar sin imágenes, el proveedor las agregará manualmente
             update_post_meta($post_id, 'full_days_gallery', array());
             return $post_id;
         }
         
-        // Descargar y subir imágenes a WordPress
+        // Procesar y guardar imágenes en WordPress
         require_once(ABSPATH . 'wp-admin/includes/file.php');
         require_once(ABSPATH . 'wp-admin/includes/image.php');
         require_once(ABSPATH . 'wp-admin/includes/media.php');
         
         $featured_image_id = null;
         $gallery_urls = array();
+        $wp_upload_dir = wp_upload_dir();
         
-        foreach ($image_urls as $index => $image_url) {
-            error_log('Descargando imagen ' . ($index + 1) . '/' . count($image_urls));
-            error_log('URL: ' . $image_url);
+        foreach ($image_data_array as $index => $image_data) {
+            error_log('Procesando imagen ' . ($index + 1) . '/' . count($image_data_array));
             
-            // Descargar imagen desde URL de DALL-E
-            $temp_file = download_url($image_url, 60);
+            // Decodificar base64
+            $decoded_image = base64_decode($image_data['data']);
             
-            if (is_wp_error($temp_file)) {
-                error_log('Error al descargar imagen: ' . $temp_file->get_error_message());
+            if ($decoded_image === false) {
+                error_log('Error al decodificar base64 de imagen ' . ($index + 1));
                 continue;
             }
             
-            // Obtener tipo MIME
-            $file_type = wp_check_filetype(basename($image_url), null);
-            $wp_upload_dir = wp_upload_dir();
+            // Determinar extensión según MIME type
+            $extension = 'png';
+            if (strpos($image_data['mime_type'], 'jpeg') !== false || strpos($image_data['mime_type'], 'jpg') !== false) {
+                $extension = 'jpg';
+            } elseif (strpos($image_data['mime_type'], 'webp') !== false) {
+                $extension = 'webp';
+            }
             
-            // Mover a uploads
-            $filename = 'fullday-ai-' . $post_id . '-' . time() . '-' . $index . '.png';
+            // Generar nombre único
+            $filename = 'fullday-gemini-' . $post_id . '-' . time() . '-' . $index . '.' . $extension;
             $upload_path = $wp_upload_dir['path'] . '/' . $filename;
             
-            rename($temp_file, $upload_path);
+            // Guardar archivo
+            $saved = file_put_contents($upload_path, $decoded_image);
+            
+            if ($saved === false) {
+                error_log('Error al guardar imagen ' . ($index + 1) . ' en disco');
+                continue;
+            }
+            
+            error_log('Imagen guardada en: ' . $upload_path);
             
             // Crear attachment
             $attachment = array(
-                'post_mime_type' => 'image/png',
+                'post_mime_type' => $image_data['mime_type'],
                 'post_title' => sanitize_file_name(pathinfo($filename, PATHINFO_FILENAME)),
                 'post_content' => '',
                 'post_status' => 'inherit',
@@ -998,7 +1014,7 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
             
             error_log('Attachment ID creado: ' . $attach_id);
             
-            // Generar metadata
+            // Generar metadata (thumbnails, etc.)
             $attach_data = wp_generate_attachment_metadata($attach_id, $upload_path);
             wp_update_attachment_metadata($attach_id, $attach_data);
             
