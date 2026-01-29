@@ -44,7 +44,8 @@
       "WebSearch",
       "WebFetch(domain:ai.google.dev)",
       "WebFetch(domain:blog.laozhang.ai)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(del nul:*)"
     ]
   }
 }
