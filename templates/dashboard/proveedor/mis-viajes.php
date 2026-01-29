@@ -51,17 +51,18 @@ $fulldays_query = new WP_Query($args);
             <?php while ($fulldays_query->have_posts()) : $fulldays_query->the_post();
                 $post_id = get_the_ID();
                 $thumbnail_url = get_the_post_thumbnail_url($post_id, 'large');
-                $price = get_post_meta($post_id, 'full_days_price', true);
+                $price = floatval(get_post_meta($post_id, 'full_days_price', true));
                 $departure_date = get_post_meta($post_id, 'full_days_departure_date', true);
-                $max_people = get_post_meta($post_id, 'full_days_max_people', true) ?: 0;
+                $max_people = intval(get_post_meta($post_id, 'full_days_max_people', true));
                 $available_spots = get_post_meta($post_id, 'full_days_available_spots', true);
                 // Si no existe available_spots, usar max_people como valor inicial
                 if ($available_spots === '') {
                     $available_spots = $max_people;
                 }
-                $rating = get_post_meta($post_id, 'full_days_rating', true) ?: 0;
-                $reviews_count = get_post_meta($post_id, 'full_days_reviews_count', true) ?: 0;
-                $views = get_post_meta($post_id, 'full_days_views', true) ?: 0;
+                $available_spots = intval($available_spots);
+                $rating = floatval(get_post_meta($post_id, 'full_days_rating', true));
+                $reviews_count = intval(get_post_meta($post_id, 'full_days_reviews_count', true));
+                $views = intval(get_post_meta($post_id, 'full_days_views', true));
                 $is_active = get_post_status() === 'publish';
                 $post_slug = get_post_field('post_name', $post_id);
             ?>
