@@ -764,6 +764,8 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
      * Generar imágenes con Gemini 2.5 Flash Image
      */
     private static function generate_images_with_gemini($image_prompts, $api_key) {
+        /* FUNCIÓN DESACTIVADA - Generación de imágenes con Gemini comentada
+        
         if (empty($api_key)) {
             error_log('AI Chat - Gemini API Key no configurada');
             return new WP_Error('no_api_key', 'La API Key de Google Gemini no está configurada');
@@ -945,24 +947,24 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
         }
         
         return $generated_images;
+        
+        FIN FUNCIÓN DESACTIVADA */
+        
+        // Retornar array vacío ya que la función está desactivada
+        return array();
     }
 
     /**
      * Crear Full Day desde JSON generado por la IA
      */
     private static function create_fullday_from_json($data, $user_id) {
-        // Validar datos requeridos
-        $required_fields = array('title', 'description', 'destination', 'departure_date', 'duration', 'price', 'max_people', 'includes', 'itinerary', 'region_ids', 'category', 'image_prompts');
+        // Validar datos requeridos (image_prompts YA NO ES REQUERIDO)
+        $required_fields = array('title', 'description', 'destination', 'departure_date', 'duration', 'price', 'max_people', 'includes', 'itinerary', 'region_ids', 'category');
 
         foreach ($required_fields as $field) {
             if (empty($data[$field])) {
                 return new WP_Error('missing_field', "Falta el campo requerido: {$field}");
             }
-        }
-        
-        // Validar que image_prompts tenga al menos 3 elementos
-        if (!is_array($data['image_prompts']) || count($data['image_prompts']) < 3) {
-            return new WP_Error('invalid_image_prompts', 'Se requieren al menos 3 descripciones de imágenes en el campo image_prompts. Por favor, intenta nuevamente.');
         }
 
         // Crear el post
@@ -1029,6 +1031,8 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
         // Asignar categoría
         wp_set_object_terms($post_id, sanitize_text_field($data['category']), 'full_days_category');
 
+        /* GENERACIÓN DE IMÁGENES DESACTIVADA
+        
         // GENERAR IMÁGENES CON GEMINI 2.5 FLASH IMAGE
         error_log('=== INICIO GENERACIÓN Y GUARDADO DE IMÁGENES ===');
         error_log('image_prompts recibido: ' . print_r($data['image_prompts'], true));
@@ -1164,6 +1168,11 @@ Genera el JSON COMPLETO ahora. Responde ÚNICAMENTE con el JSON válido, sin tex
         
         // Guardar galería
         update_post_meta($post_id, 'full_days_gallery', $gallery_urls);
+        
+        FIN GENERACIÓN DE IMÁGENES DESACTIVADA */
+        
+        // Inicializar galería vacía
+        update_post_meta($post_id, 'full_days_gallery', array());
 
         return $post_id;
     }

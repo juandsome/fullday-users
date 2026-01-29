@@ -9,7 +9,7 @@
     // Variables globales
     let conversationHistory = [];
     let isProcessing = false;
-    let attachedImages = []; // Array para almacenar imágenes adjuntas actualmente
+    // let attachedImages = []; // DESACTIVADO - Funcionalidad de imágenes eliminada
 
     $(document).ready(function() {
         // Solo ejecutar si estamos en la pestaña de IA
@@ -22,8 +22,8 @@
         $('#ai-chat-input').on('keydown', handleKeyPress);
         $('#ai-clear-chat').on('click', clearChat);
         $('#ai-save-fullday').on('click', saveFullDay);
-        $('#ai-attach-image').on('click', openImageSelector);
-        $('#ai-image-input').on('change', handleImageSelection);
+        // $('#ai-attach-image').on('click', openImageSelector); // DESACTIVADO
+        // $('#ai-image-input').on('change', handleImageSelection); // DESACTIVADO
 
         // Habilitar botón de guardar después de al menos 2 intercambios
         updateSaveButton();
@@ -39,19 +39,15 @@
         }
     }
 
-    /**
-     * Abrir selector de imágenes
-     */
+    /* FUNCIONES DE IMÁGENES DESACTIVADAS
+
     function openImageSelector() {
         $('#ai-image-input').click();
     }
 
-    /**
-     * Manejar selección de imágenes
-     */
     function handleImageSelection(e) {
         const files = e.target.files;
-        
+
         if (files.length === 0) {
             return;
         }
@@ -94,9 +90,6 @@
         e.target.value = '';
     }
 
-    /**
-     * Mostrar preview de imagen
-     */
     function displayImagePreview(imageData, index) {
         const previewHtml = `
             <div class="image-preview" data-index="${index}">
@@ -118,9 +111,6 @@
         });
     }
 
-    /**
-     * Eliminar imagen adjunta
-     */
     function removeImage(index) {
         // Eliminar del array
         attachedImages.splice(index, 1);
@@ -140,6 +130,8 @@
         }
     }
 
+    FIN FUNCIONES DESACTIVADAS */
+
     /**
      * Enviar mensaje a la IA
      */
@@ -151,15 +143,15 @@
         const input = $('#ai-chat-input');
         const message = input.val().trim();
 
-        // Verificar que haya mensaje o imágenes
-        if (!message && attachedImages.length === 0) {
+        // Verificar que haya mensaje
+        if (!message) {
             return;
         }
 
-        // Preparar contenido del mensaje (texto + imágenes)
+        // Preparar contenido del mensaje (solo texto)
         const messageContent = {
-            text: message,
-            images: attachedImages.length > 0 ? [...attachedImages] : null
+            text: message
+            // images: null // DESACTIVADO
         };
 
         // Agregar mensaje del usuario al historial
@@ -169,19 +161,16 @@
         });
 
         // Mostrar mensaje del usuario
-        appendUserMessage(message, attachedImages.length > 0 ? [...attachedImages] : null);
+        appendUserMessage(message);
 
-        // Limpiar input e imágenes
+        // Limpiar input
         input.val('');
-        const imagesToSend = [...attachedImages];
-        attachedImages = [];
-        $('#ai-image-preview-container').empty().hide();
 
         // Deshabilitar input y botón
         isProcessing = true;
         input.prop('disabled', true);
         $('#ai-send-message').prop('disabled', true);
-        $('#ai-attach-image').prop('disabled', true);
+        // $('#ai-attach-image').prop('disabled', true); // DESACTIVADO
 
         // Mostrar indicador de escritura
         showTypingIndicator();
@@ -203,7 +192,7 @@
                 action: 'fullday_ai_send_message',
                 nonce: nonce,
                 message: message || '',
-                images: imagesToSend.length > 0 ? JSON.stringify(imagesToSend) : '',
+                // images: '', // DESACTIVADO
                 history: JSON.stringify(conversationHistory.slice(0, -1)), // Enviar historial sin el último mensaje
                 proveedor_nombre: proveedorNombre
             },
@@ -236,7 +225,7 @@
                 isProcessing = false;
                 input.prop('disabled', false);
                 $('#ai-send-message').prop('disabled', false);
-                $('#ai-attach-image').prop('disabled', false);
+                // $('#ai-attach-image').prop('disabled', false); // DESACTIVADO
                 input.focus();
             }
         });
@@ -245,17 +234,7 @@
     /**
      * Agregar mensaje del usuario al chat
      */
-    function appendUserMessage(message, images = null) {
-        let imagesHtml = '';
-        
-        if (images && images.length > 0) {
-            imagesHtml = '<div class="message-images">';
-            images.forEach(img => {
-                imagesHtml += `<img src="${img.data}" alt="${escapeHtml(img.name)}" class="message-image">`;
-            });
-            imagesHtml += '</div>';
-        }
-
+    function appendUserMessage(message) {
         const messageHtml = `
             <div class="user-message">
                 <div class="message-avatar">
@@ -265,8 +244,7 @@
                     </svg>
                 </div>
                 <div class="message-content">
-                    ${message ? '<p>' + escapeHtml(message) + '</p>' : ''}
-                    ${imagesHtml}
+                    <p>${escapeHtml(message)}</p>
                 </div>
             </div>
         `;
@@ -345,9 +323,9 @@
         // Limpiar historial
         conversationHistory = [];
 
-        // Limpiar imágenes adjuntas
-        attachedImages = [];
-        $('#ai-image-preview-container').empty().hide();
+        // Limpiar imágenes adjuntas - DESACTIVADO
+        // attachedImages = [];
+        // $('#ai-image-preview-container').empty().hide();
 
         // Limpiar mensajes (mantener solo el mensaje de bienvenida inicial)
         $('#ai-chat-messages').find('.user-message, .ai-message:not(:first)').remove();
