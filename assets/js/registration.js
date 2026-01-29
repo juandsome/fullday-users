@@ -7,6 +7,26 @@
     'use strict';
 
     $(document).ready(function() {
+        // Toggle entre tabs Cliente/Proveedor
+        $('.fullday-tab').on('click', function() {
+            const type = $(this).data('type');
+
+            // Actualizar tabs
+            $('.fullday-tab').removeClass('active');
+            $(this).addClass('active');
+
+            // Actualizar subtítulo
+            const subtitle = type === 'cliente' ? 'Regístrate como cliente' : 'Regístrate como proveedor';
+            $('#fullday-registration-subtitle').text(subtitle);
+
+            // Actualizar botón de envío
+            const btnText = type === 'cliente' ? 'Registrarse como Cliente' : 'Registrarse como Proveedor';
+            $('#fullday-submit-btn .btn-text').text(btnText);
+
+            // Actualizar campo hidden
+            $('#user_type').val(type);
+        });
+
         // Submit del formulario
         $('#fullday-registration-form').on('submit', function(e) {
             e.preventDefault();
@@ -15,6 +35,7 @@
             const email = $('#email').val().trim();
             const password = $('#password').val();
             const confirmPassword = $('#confirm_password').val();
+            const userType = $('#user_type').val();
             const nonce = $('#fullday_register_nonce_field').val();
 
             // Validaciones básicas
@@ -55,7 +76,8 @@
                     nonce: nonce,
                     email: email,
                     password: password,
-                    confirm_password: confirmPassword
+                    confirm_password: confirmPassword,
+                    user_type: userType
                 },
                 success: function(response) {
                     hideLoading();

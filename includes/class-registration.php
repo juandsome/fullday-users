@@ -49,10 +49,16 @@ class Fullday_Users_Registration {
         <div class="fullday-registration-container">
             <div class="fullday-registration-box">
                 <h2 class="fullday-registration-title">Crear cuenta</h2>
-                <p class="fullday-registration-subtitle">Regístrate en la plataforma</p>
+                <p class="fullday-registration-subtitle" id="fullday-registration-subtitle">Regístrate como cliente</p>
+
+                <div class="fullday-registration-tabs">
+                    <button class="fullday-tab active" data-type="cliente">Cliente</button>
+                    <button class="fullday-tab" data-type="proveedor">Proveedor</button>
+                </div>
 
                 <form id="fullday-registration-form" class="fullday-registration-form">
                     <?php wp_nonce_field('fullday_register_nonce', 'fullday_register_nonce_field'); ?>
+                    <input type="hidden" name="user_type" id="user_type" value="cliente">
 
                     <div class="fullday-form-group">
                         <label for="email">Correo electrónico</label>
@@ -72,7 +78,7 @@ class Fullday_Users_Registration {
                     <div class="fullday-form-error" id="fullday-form-error" style="display: none;"></div>
 
                     <button type="submit" class="fullday-submit-btn" id="fullday-submit-btn">
-                        <span class="btn-text">Registrarse</span>
+                        <span class="btn-text">Registrarse como Cliente</span>
                         <span class="btn-loader" style="display: none;">
                             <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
                                 <circle class="spinner-circle" cx="12" cy="12" r="10" fill="none" stroke-width="3"></circle>
@@ -97,6 +103,7 @@ class Fullday_Users_Registration {
         $email = sanitize_email($_POST['email']);
         $password = $_POST['password'];
         $confirm_password = $_POST['confirm_password'];
+        $user_type = isset($_POST['user_type']) ? sanitize_text_field($_POST['user_type']) : 'cliente';
 
         // Validaciones
         if (empty($email) || empty($password)) {
@@ -133,13 +140,18 @@ class Fullday_Users_Registration {
             'user_login' => $username,
             'user_email' => $email,
             'user_pass' => $password,
-            'role' => 'fullday_cliente'
+            'role' => ($user_type === 'proveedor') ? 'fullday_proveedor' : 'fullday_cliente'
         );
 
         $user_id = wp_insert_user($user_data);
 
         if (is_wp_error($user_id)) {
             wp_send_json_error(array('message' => $user_id->get_error_message()));
+        }
+
+        // Si es proveedor, marcarlo como no aprobado
+        if ($user_type === 'proveedor') {
+            update_user_meta($user_id, 'proveedor_approved', '0');
         }
 
         // Auto login
