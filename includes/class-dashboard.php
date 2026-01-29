@@ -317,6 +317,17 @@ class Fullday_Users_Dashboard {
         }
 
         $user_id = get_current_user_id();
+        
+        // Prevenir ejecuciones duplicadas usando un transient
+        $transient_key = 'fullday_profile_update_' . $user_id;
+        if (get_transient($transient_key)) {
+            error_log('=== EJECUCIÓN DUPLICADA PREVENIDA ===');
+            wp_send_json_success(array('message' => 'Perfil actualizado correctamente.'));
+            return;
+        }
+        
+        // Establecer transient por 3 segundos para prevenir duplicados
+        set_transient($transient_key, true, 3);
         $user_type = Fullday_Users_Roles::get_user_type($user_id);
 
         // LOG: Datos recibidos
@@ -348,8 +359,8 @@ class Fullday_Users_Dashboard {
 
         // Datos específicos de proveedor
         if ($user_type === 'proveedor') {
-            $empresa = sanitize_text_field($_POST['empresa']);
-            $descripcion = sanitize_textarea_field($_POST['descripcion']);
+            $empresa = isset($_POST['empresa']) ? sanitize_text_field($_POST['empresa']) : '';
+            $descripcion = isset($_POST['descripcion']) ? sanitize_textarea_field($_POST['descripcion']) : '';
             $facebook_url = isset($_POST['facebook_url']) ? esc_url_raw($_POST['facebook_url']) : '';
             $instagram_url = isset($_POST['instagram_url']) ? esc_url_raw($_POST['instagram_url']) : '';
             $whatsapp = isset($_POST['whatsapp']) ? sanitize_text_field($_POST['whatsapp']) : '';
@@ -384,9 +395,14 @@ class Fullday_Users_Dashboard {
                         error_log("Meta '{$meta_key}' creado con valor: {$meta_value}");
                     }
                 } else {
-                    // Si el meta existe, actualizarlo (incluso si el nuevo valor es vacío)
-                    update_user_meta($user_id, $meta_key, $meta_value);
-                    error_log("Meta '{$meta_key}' actualizado a: {$meta_value}");
+                    // Si el meta existe, solo actualizarlo si hay un valor nuevo
+                    // Esto evita que valores vacíos sobrescriban datos existentes
+                    if ($meta_value !== '') {
+                        update_user_meta($user_id, $meta_key, $meta_value);
+                        error_log("Meta '{$meta_key}' actualizado a: {$meta_value}");
+                    } else {
+                        error_log("Meta '{$meta_key}' no actualizado - valor vacío ignorado para preservar datos existentes");
+                    }
                 }
             }
 
@@ -400,6 +416,9 @@ class Fullday_Users_Dashboard {
         }
 
         error_log('=== FIN UPDATE PROFILE ===');
+        
+        // Limpiar transient
+        delete_transient($transient_key);
 
         wp_send_json_success(array('message' => 'Perfil actualizado correctamente.'));
     }
