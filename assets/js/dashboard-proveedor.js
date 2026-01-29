@@ -7,6 +7,55 @@
     'use strict';
 
     $(document).ready(function() {
+        // Copiar URL del perfil
+        $('#copy-profile-url-btn').on('click', function() {
+            const $button = $(this);
+            const $input = $('#profile-url-input');
+            const url = $input.val();
+
+            // Copiar al portapapeles
+            $input.select();
+            $input[0].setSelectionRange(0, 99999); // Para móviles
+
+            try {
+                // Intentar copiar usando la API moderna
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(url).then(function() {
+                        // Cambiar el texto del botón temporalmente
+                        const originalHtml = $button.html();
+                        $button.html('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>Copiado!');
+                        $button.addClass('copied');
+
+                        // Restaurar después de 2 segundos
+                        setTimeout(function() {
+                            $button.html(originalHtml);
+                            $button.removeClass('copied');
+                        }, 2000);
+                    }).catch(function(err) {
+                        console.error('Error al copiar:', err);
+                        alert('No se pudo copiar la URL. Por favor, cópiala manualmente.');
+                    });
+                } else {
+                    // Fallback para navegadores antiguos
+                    document.execCommand('copy');
+                    const originalHtml = $button.html();
+                    $button.html('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>Copiado!');
+                    $button.addClass('copied');
+
+                    setTimeout(function() {
+                        $button.html(originalHtml);
+                        $button.removeClass('copied');
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('Error al copiar:', err);
+                alert('No se pudo copiar la URL. Por favor, cópiala manualmente.');
+            }
+
+            // Deseleccionar el texto
+            window.getSelection().removeAllRanges();
+        });
+
         // Dropdown dependiente Estado -> Ciudad en perfil
         $('#estado').on('change', function() {
             const estado = $(this).val();

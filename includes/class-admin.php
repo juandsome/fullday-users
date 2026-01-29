@@ -367,13 +367,24 @@ class Fullday_Users_Admin {
      * Agregar página de configuración al menú
      */
     public static function add_settings_page() {
-        add_options_page(
+        $hook = add_options_page(
             'Fullday Users - Configuración',
             'Fullday Users',
             'manage_options',
             'fullday-users-settings',
             array(__CLASS__, 'render_settings_page')
         );
+
+        // Cargar media uploader en esta página
+        add_action('load-' . $hook, array(__CLASS__, 'load_settings_page_scripts'));
+    }
+
+    /**
+     * Cargar scripts necesarios para la página de configuración
+     */
+    public static function load_settings_page_scripts() {
+        // Cargar media uploader de WordPress
+        wp_enqueue_media();
     }
 
     /**
@@ -426,6 +437,24 @@ class Fullday_Users_Admin {
             array(__CLASS__, 'facebook_app_secret_callback'),
             'fullday-users-settings',
             'fullday_social_login_section'
+        );
+
+        // Sección de Imágenes
+        add_settings_section(
+            'fullday_images_section',
+            'Configuración de Imágenes',
+            array(__CLASS__, 'images_section_callback'),
+            'fullday-users-settings'
+        );
+
+        // Banner Placeholder
+        register_setting('fullday_users_settings', 'fullday_banner_placeholder');
+        add_settings_field(
+            'fullday_banner_placeholder',
+            'Banner Placeholder',
+            array(__CLASS__, 'banner_placeholder_callback'),
+            'fullday-users-settings',
+            'fullday_images_section'
         );
     }
 
@@ -491,5 +520,101 @@ class Fullday_Users_Admin {
         $value = get_option('fullday_facebook_app_secret', '');
         echo '<input type="password" name="fullday_facebook_app_secret" value="' . esc_attr($value) . '" class="regular-text" />';
         echo '<p class="description">Secret de la aplicación de Facebook</p>';
+    }
+
+    /**
+     * Callback para la sección de imágenes
+     */
+    public static function images_section_callback() {
+        echo '<p>Configura las imágenes por defecto que se mostrarán cuando los proveedores no tengan imágenes personalizadas.</p>';
+    }
+
+    /**
+     * Campo Banner Placeholder
+     */
+    public static function banner_placeholder_callback() {
+        $image_id = get_option('fullday_banner_placeholder', '');
+        $image_url = $image_id ? wp_get_attachment_url($image_id) : '';
+        ?>
+        <div class="fullday-banner-placeholder-wrapper">
+            <input type="hidden" id="fullday_banner_placeholder" name="fullday_banner_placeholder" value="<?php echo esc_attr($image_id); ?>" />
+            <div class="banner-preview" style="margin-bottom: 10px;">
+                <?php if ($image_url): ?>
+                    <img src="<?php echo esc_url($image_url); ?>" style="max-width: 400px; height: auto; display: block; border: 1px solid #ddd; border-radius: 4px;" id="banner-preview-image" />
+                <?php else: ?>
+                    <div style="width: 400px; height: 150px; background: #f0f0f0; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; border-radius: 4px;" id="banner-preview-placeholder">
+                        <span style="color: #999;">No hay imagen seleccionada</span>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <button type="button" class="button button-primary" id="fullday_banner_placeholder_button">
+                <?php echo $image_url ? 'Cambiar Imagen' : 'Seleccionar Imagen'; ?>
+            </button>
+            <?php if ($image_url): ?>
+                <button type="button" class="button" id="fullday_banner_placeholder_remove">Eliminar Imagen</button>
+            <?php endif; ?>
+            <p class="description">Esta imagen se mostrará en el banner de los proveedores que no tengan una imagen de banner personalizada.</p>
+        </div>
+        <script>
+        jQuery(document).ready(function($) {
+            var frame;
+
+            // Abrir media uploader
+            $('#fullday_banner_placeholder_button').on('click', function(e) {
+                e.preventDefault();
+
+                if (frame) {
+                    frame.open();
+                    return;
+                }
+
+                frame = wp.media({
+                    title: 'Seleccionar Banner Placeholder',
+                    button: {
+                        text: 'Usar esta imagen'
+                    },
+                    multiple: false,
+                    library: {
+                        type: 'image'
+                    }
+                });
+
+                frame.on('select', function() {
+                    var attachment = frame.state().get('selection').first().toJSON();
+                    $('#fullday_banner_placeholder').val(attachment.id);
+
+                    // Actualizar preview
+                    var previewHtml = '<img src="' + attachment.url + '" style="max-width: 400px; height: auto; display: block; border: 1px solid #ddd; border-radius: 4px;" id="banner-preview-image" />';
+                    $('.banner-preview').html(previewHtml);
+
+                    // Actualizar botón
+                    $('#fullday_banner_placeholder_button').text('Cambiar Imagen');
+
+                    // Mostrar botón de eliminar si no existe
+                    if (!$('#fullday_banner_placeholder_remove').length) {
+                        $('#fullday_banner_placeholder_button').after('<button type="button" class="button" id="fullday_banner_placeholder_remove" style="margin-left: 5px;">Eliminar Imagen</button>');
+                    }
+                });
+
+                frame.open();
+            });
+
+            // Eliminar imagen
+            $(document).on('click', '#fullday_banner_placeholder_remove', function(e) {
+                e.preventDefault();
+
+                $('#fullday_banner_placeholder').val('');
+
+                // Actualizar preview
+                var placeholderHtml = '<div style="width: 400px; height: 150px; background: #f0f0f0; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; border-radius: 4px;" id="banner-preview-placeholder"><span style="color: #999;">No hay imagen seleccionada</span></div>';
+                $('.banner-preview').html(placeholderHtml);
+
+                // Actualizar botón
+                $('#fullday_banner_placeholder_button').text('Seleccionar Imagen');
+                $(this).remove();
+            });
+        });
+        </script>
+        <?php
     }
 }

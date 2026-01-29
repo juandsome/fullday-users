@@ -32,6 +32,13 @@ $cashea_code = get_user_meta($user_id, 'cashea_code', true);
 $avatar_url = Fullday_Users_Dashboard::get_user_avatar($user_id);
 $banner_id = get_user_meta($user_id, 'banner', true);
 $banner_url = $banner_id ? wp_get_attachment_url($banner_id) : '';
+
+// Si no hay banner, usar placeholder del admin
+if (!$banner_url) {
+    $placeholder_id = get_option('fullday_banner_placeholder', '');
+    $banner_url = $placeholder_id ? wp_get_attachment_url($placeholder_id) : '';
+}
+
 $initials = Fullday_Users_Dashboard::get_user_initials($user_id);
 $approved = get_user_meta($user_id, 'proveedor_approved', true);
 $is_approved = ($approved === '1' || $approved === 1);
@@ -99,6 +106,25 @@ $is_approved = ($approved === '1' || $approved === 1);
             </div>
         </div>
         <input type="file" id="proveedor-banner-upload" accept="image/jpeg,image/png" style="display: none;">
+    </div>
+
+    <!-- URL del perfil público -->
+    <?php
+    $profile_url = home_url('/perfil/' . $user->user_nicename);
+    ?>
+    <div class="profile-url-section">
+        <label class="profile-url-label">URL de tu perfil público</label>
+        <div class="profile-url-container">
+            <input type="text" id="profile-url-input" value="<?php echo esc_url($profile_url); ?>" readonly class="profile-url-input">
+            <button type="button" id="copy-profile-url-btn" class="btn-copy-url" title="Copiar URL">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copiar URL
+            </button>
+        </div>
+        <p class="profile-url-hint">Comparte esta URL para que tus clientes vean tu perfil público</p>
     </div>
 
     <h2 class="perfil-title">

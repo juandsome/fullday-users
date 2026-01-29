@@ -99,6 +99,13 @@ class Fullday_Users_Dashboard {
         $avatar_url = self::get_user_avatar($proveedor_id);
         $banner_id = get_user_meta($proveedor_id, 'banner', true);
         $banner_url = $banner_id ? wp_get_attachment_url($banner_id) : '';
+
+        // Si no hay banner, usar placeholder del admin
+        if (!$banner_url) {
+            $placeholder_id = get_option('fullday_banner_placeholder', '');
+            $banner_url = $placeholder_id ? wp_get_attachment_url($placeholder_id) : '';
+        }
+
         $initials = self::get_user_initials($proveedor_id);
 
         ob_start();
@@ -227,6 +234,13 @@ class Fullday_Users_Dashboard {
         $avatar_url = self::get_user_avatar($proveedor_id);
         $banner_id = get_user_meta($proveedor_id, 'banner', true);
         $banner_url = $banner_id ? wp_get_attachment_url($banner_id) : '';
+
+        // Si no hay banner, usar placeholder del admin
+        if (!$banner_url) {
+            $placeholder_id = get_option('fullday_banner_placeholder', '');
+            $banner_url = $placeholder_id ? wp_get_attachment_url($placeholder_id) : '';
+        }
+
         $initials = self::get_user_initials($proveedor_id);
 
         ob_start();
