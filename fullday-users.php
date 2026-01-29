@@ -3,7 +3,7 @@
  * Plugin Name: Fullday Users
  * Plugin URI: https://fullday.com
  * Description: Sistema de registro y gestión de usuarios cliente y proveedor para Fullday
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Fullday Team
  * Author URI: https://fullday.com
  * Text Domain: fullday-users
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Definir constantes del plugin
-define('FULLDAY_USERS_VERSION', '1.0.0');
+define('FULLDAY_USERS_VERSION', '1.0.1');
 define('FULLDAY_USERS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FULLDAY_USERS_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FULLDAY_USERS_PLUGIN_BASENAME', plugin_basename(__FILE__));
