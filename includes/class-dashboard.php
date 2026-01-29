@@ -363,12 +363,32 @@ class Fullday_Users_Dashboard {
             error_log('WhatsApp: ' . $whatsapp);
             error_log('Cashea Code: ' . $cashea_code);
 
-            update_user_meta($user_id, 'empresa', $empresa);
-            update_user_meta($user_id, 'descripcion', $descripcion);
-            update_user_meta($user_id, 'facebook_url', $facebook_url);
-            update_user_meta($user_id, 'instagram_url', $instagram_url);
-            update_user_meta($user_id, 'whatsapp', $whatsapp);
-            update_user_meta($user_id, 'cashea_code', $cashea_code);
+            // Guardar cada meta (crear si no existe, actualizar si existe)
+            // Esto soluciona el problema cuando el meta nunca ha sido creado
+            $metas_to_save = array(
+                'empresa' => $empresa,
+                'descripcion' => $descripcion,
+                'facebook_url' => $facebook_url,
+                'instagram_url' => $instagram_url,
+                'whatsapp' => $whatsapp,
+                'cashea_code' => $cashea_code
+            );
+
+            foreach ($metas_to_save as $meta_key => $meta_value) {
+                $current_value = get_user_meta($user_id, $meta_key, true);
+
+                // Si el meta no existe (false o vacío) y tenemos un valor, agregarlo
+                if ($current_value === false || $current_value === '') {
+                    if ($meta_value !== '') {
+                        add_user_meta($user_id, $meta_key, $meta_value, true);
+                        error_log("Meta '{$meta_key}' creado con valor: {$meta_value}");
+                    }
+                } else {
+                    // Si el meta existe, actualizarlo (incluso si el nuevo valor es vacío)
+                    update_user_meta($user_id, $meta_key, $meta_value);
+                    error_log("Meta '{$meta_key}' actualizado a: {$meta_value}");
+                }
+            }
 
             // LOG: Verificar que se guardó correctamente
             error_log('Empresa guardada: ' . get_user_meta($user_id, 'empresa', true));
