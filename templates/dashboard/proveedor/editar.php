@@ -72,7 +72,7 @@ $whatsapp_message = get_post_meta($post_id, 'full_days_whatsapp_message', true);
 $includes = get_post_meta($post_id, 'full_days_includes', true);
 $itinerary = get_post_meta($post_id, 'full_days_itinerary', true);
 $featured_image_id = get_post_thumbnail_id($post_id);
-$featured_image_url = get_the_post_thumbnail_url($post_id, 'medium');
+$featured_image_url = get_the_post_thumbnail_url($post_id, 'large');
 $gallery = get_post_meta($post_id, 'full_days_gallery', true);
 
 // Parsear itinerario

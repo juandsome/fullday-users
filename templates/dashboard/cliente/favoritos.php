@@ -43,7 +43,7 @@ $favoritos_query = new WP_Query($args);
         <div class="favoritos-grid">
             <?php while ($favoritos_query->have_posts()) : $favoritos_query->the_post();
                 $post_id = get_the_ID();
-                $thumbnail_url = get_the_post_thumbnail_url($post_id, 'medium');
+                $thumbnail_url = get_the_post_thumbnail_url($post_id, 'large');
                 $price = get_post_meta($post_id, 'full_days_price', true);
                 $original_price = get_post_meta($post_id, 'full_days_discount_price', true);
                 $rating = get_post_meta($post_id, 'full_days_rating', true) ?: 0;

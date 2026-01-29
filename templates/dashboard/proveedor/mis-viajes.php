@@ -50,7 +50,7 @@ $fulldays_query = new WP_Query($args);
         <div class="fulldays-grid">
             <?php while ($fulldays_query->have_posts()) : $fulldays_query->the_post();
                 $post_id = get_the_ID();
-                $thumbnail_url = get_the_post_thumbnail_url($post_id, 'medium');
+                $thumbnail_url = get_the_post_thumbnail_url($post_id, 'large');
                 $price = get_post_meta($post_id, 'full_days_price', true);
                 $departure_date = get_post_meta($post_id, 'full_days_departure_date', true);
                 $max_people = get_post_meta($post_id, 'full_days_max_people', true) ?: 0;
