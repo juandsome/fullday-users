@@ -32,6 +32,7 @@ $cashea_code = get_user_meta($user_id, 'cashea_code', true);
 $avatar_url = Fullday_Users_Dashboard::get_user_avatar($user_id);
 $banner_id = get_user_meta($user_id, 'banner', true);
 $banner_url = $banner_id ? wp_get_attachment_url($banner_id) : '';
+$has_custom_banner = !empty($banner_id); // Flag para saber si tiene banner personalizado
 
 // Si no hay banner, usar placeholder del admin
 if (!$banner_url) {
@@ -72,7 +73,20 @@ $is_approved = ($approved === '1' || $approved === 1);
 
                 <!-- Upload section que aparece en hover -->
                 <div class="banner-upload-overlay">
-                    <button type="button" class="btn-cambiar-banner" id="proveedor-btn-cambiar-banner">Cambiar Banner</button>
+                    <div class="banner-buttons">
+                        <button type="button" class="btn-cambiar-banner" id="proveedor-btn-cambiar-banner">
+                            <?php echo $has_custom_banner ? 'Cambiar Banner' : 'Subir Banner'; ?>
+                        </button>
+                        <?php if ($has_custom_banner): ?>
+                            <button type="button" class="btn-eliminar-banner" id="proveedor-btn-eliminar-banner">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                                Eliminar Banner
+                            </button>
+                        <?php endif; ?>
+                    </div>
                     <p class="banner-upload-hint">Recomendado: 1200x400px, JPG o PNG</p>
                 </div>
             </div>

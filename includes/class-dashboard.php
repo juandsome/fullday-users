@@ -29,6 +29,7 @@ class Fullday_Users_Dashboard {
         add_action('wp_ajax_fullday_update_password', array(__CLASS__, 'ajax_update_password'));
         add_action('wp_ajax_fullday_upload_avatar', array(__CLASS__, 'ajax_upload_avatar'));
         add_action('wp_ajax_fullday_upload_banner', array(__CLASS__, 'ajax_upload_banner'));
+        add_action('wp_ajax_fullday_delete_banner', array(__CLASS__, 'ajax_delete_banner'));
 
         // AJAX handlers para crear Full Days
         add_action('wp_ajax_fullday_upload_fullday_image', array(__CLASS__, 'ajax_upload_fullday_image'));
@@ -600,6 +601,31 @@ class Fullday_Users_Dashboard {
         wp_send_json_success(array(
             'attachment_id' => $attach_id,
             'url' => $upload['url']
+        ));
+    }
+
+    /**
+     * AJAX: Eliminar banner del usuario
+     */
+    public static function ajax_delete_banner() {
+        check_ajax_referer('fullday_users_nonce', 'nonce');
+
+        if (!is_user_logged_in()) {
+            wp_send_json_error(array('message' => 'Debes iniciar sesión.'));
+        }
+
+        $user_id = get_current_user_id();
+
+        // Eliminar el meta del banner
+        delete_user_meta($user_id, 'banner');
+
+        // Obtener la URL del placeholder si existe
+        $placeholder_id = get_option('fullday_banner_placeholder', '');
+        $placeholder_url = $placeholder_id ? wp_get_attachment_url($placeholder_id) : '';
+
+        wp_send_json_success(array(
+            'message' => 'Banner eliminado correctamente.',
+            'placeholder_url' => $placeholder_url
         ));
     }
 

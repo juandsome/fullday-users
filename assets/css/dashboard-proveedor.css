@@ -493,3 +493,51 @@
         justify-content: center;
     }
 }
+
+/* Botones del banner */
+.banner-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-eliminar-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: var(--fullday-error);
+    color: var(--fullday-white);
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-eliminar-banner:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+.btn-eliminar-banner:active {
+    transform: translateY(0);
+}
+
+.btn-eliminar-banner svg {
+    width: 16px;
+    height: 16px;
+}
+
+@media (max-width: 640px) {
+    .banner-buttons {
+        width: 100%;
+    }
+
+    .btn-cambiar-banner,
+    .btn-eliminar-banner {
+        flex: 1;
+        justify-content: center;
+    }
+}

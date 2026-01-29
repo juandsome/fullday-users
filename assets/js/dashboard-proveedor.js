@@ -187,6 +187,15 @@
             }
         });
 
+        // Eliminar banner
+        $('#proveedor-btn-eliminar-banner').on('click', function() {
+            if (!confirm('¿Estás seguro de que deseas eliminar el banner? Se mostrará la imagen placeholder por defecto.')) {
+                return;
+            }
+
+            deleteBanner();
+        });
+
         // Función para subir avatar
         function uploadAvatar(file) {
             console.log('=== UPLOAD AVATAR ===');
@@ -335,6 +344,90 @@
                         showMessage('perfil', 'Banner actualizado correctamente.', 'success');
                     } else {
                         showMessage('perfil', response.data.message || 'Error al subir el banner.', 'error');
+                    }
+                },
+                error: function() {
+                    $('#banner-preview-display').css('opacity', '1');
+                    showMessage('perfil', 'Error de conexión. Intenta nuevamente.', 'error');
+                }
+            });
+        }
+
+        // Función para eliminar banner
+        function deleteBanner() {
+            console.log('=== ELIMINAR BANNER ===');
+
+            // Determinar URL de AJAX y nonce con fallback
+            var ajaxUrl = '/wp-admin/admin-ajax.php';
+            var nonce = '';
+            if (typeof fulldayUsers !== 'undefined') {
+                if (fulldayUsers.ajaxurl) {
+                    ajaxUrl = fulldayUsers.ajaxurl;
+                } else if (fulldayUsers.ajaxUrl) {
+                    ajaxUrl = fulldayUsers.ajaxUrl;
+                }
+                nonce = fulldayUsers.nonce || '';
+            }
+
+            console.log('URL AJAX para eliminar banner:', ajaxUrl);
+
+            // Mostrar loading
+            $('#banner-preview-display').css('opacity', '0.5');
+
+            // AJAX para eliminar
+            $.ajax({
+                url: ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'fullday_delete_banner',
+                    nonce: nonce
+                },
+                success: function(response) {
+                    console.log('Respuesta eliminar banner:', response);
+                    $('#banner-preview-display').css('opacity', '1');
+
+                    if (typeof response === 'string') {
+                        console.error('ERROR: Respuesta es HTML, no JSON');
+                        console.log('Primeros 500 caracteres:', response.substring(0, 500));
+                        showMessage('perfil', 'Error de configuración al eliminar banner', 'error');
+                        return;
+                    }
+
+                    if (response && response.success) {
+                        // Si hay placeholder, usarlo; si no, mostrar el placeholder genérico
+                        if (response.data.placeholder_url) {
+                            $('#banner-preview-display').css('background-image', 'url(' + response.data.placeholder_url + ')');
+                            $('#banner-preview-display').find('.banner-placeholder').remove();
+                        } else {
+                            // Mostrar el placeholder genérico
+                            $('#banner-preview-display').css('background-image', '');
+                            if ($('#banner-preview-display').find('.banner-placeholder').length === 0) {
+                                const placeholderHtml = `
+                                    <div class="banner-placeholder">
+                                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21 15 16 10 5 21"></polyline>
+                                        </svg>
+                                        <p>Sube un banner</p>
+                                    </div>
+                                `;
+                                $('#banner-preview-display').prepend(placeholderHtml);
+                            }
+                        }
+
+                        // Ocultar botón de eliminar y cambiar texto del botón principal
+                        $('#proveedor-btn-eliminar-banner').remove();
+                        $('#proveedor-btn-cambiar-banner').text('Subir Banner');
+
+                        showMessage('perfil', response.data.message, 'success');
+
+                        // Recargar página después de 1.5 segundos para actualizar todo
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showMessage('perfil', response.data.message || 'Error al eliminar el banner.', 'error');
                     }
                 },
                 error: function() {
